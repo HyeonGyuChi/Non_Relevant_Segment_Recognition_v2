@@ -88,7 +88,10 @@ class Trainer():
             self.save_checkpoint()
         
     def forward(self, x, y):
-        y_hat = self.model(x)
+        if 'online' in self.args.hem_extract_mode:
+            emb, y_hat = self.model(x)
+        else:
+            y_hat = self.model(x)
         
         loss = self.calc_loss(y_hat, y)
         

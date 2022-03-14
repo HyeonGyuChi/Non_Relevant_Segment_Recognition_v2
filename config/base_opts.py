@@ -156,6 +156,43 @@ def parse_opts():
             type=dict,
             help='How many CPUs to use for data loading')    
     
+    # -------------- Experimental Hyper-parameters --------------------
+    parser.add_argument('--experiment_type', 
+            default='ours', 
+            type=str,
+            choices=['ours', 'theator'], )
+    
+    
+    parser.add_argument('--train_stage', 
+            default='general_train', 
+            type=str,
+            choices=['mini_fold_stage_0', 'mini_fold_stage_1', 'mini_fold_stage_2', 'mini_fold_stage_3', 'hem_train', 'general_train'])
+
+    parser.add_argument('--hem_extract_mode', type=str,
+            default='offline',
+            choices=['hem-softmax_diff_small-offline', 'hem-softmax_diff_large-offline', 'hem-voting-offline', 'hem-mi_small-offline', 'hem-mi_large-offline',
+                     'hem-emb-online', 'hem-focus-online', 'offline'],
+            help='Select train method, normal or hem method')
+    
+    parser.add_argument('--dropout_prob',
+            default=0.3,
+            type=float,
+            help='?')
+    
+    parser.add_argument('--n_dropout',
+            default=1,
+            type=int,
+            help='?')
+    
+    parser.add_argument('--use_comp',
+            action='store_true',
+            help='?')
+    
+    parser.add_argument('--emb_size',
+            default=256,
+            type=int,
+            help='?')
+    
     # -------------- etc --------------------
     parser.add_argument('--random_seed', type=int, default=3829, help='dataset random seed')
 
