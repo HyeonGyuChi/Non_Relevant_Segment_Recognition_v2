@@ -136,32 +136,11 @@ def parse_opts():
             type=int,
             help='How many CPUs to use for data loading')
     
-    parser.add_argument('--augmentations',
-            default={
-                    't_resize': [256],
-                    't_random_crop': [224, True],
-                    't_to_tensor': [],
-                    't_normalize': [0.5,0.5],
-                    },
-            type=dict,
-            help='How many CPUs to use for data loading')
-           
-    parser.add_argument('--val_augmentations',
-            default={
-                    't_resize': [256],
-                    't_center_crop': [224],
-                    't_to_tensor': [],
-                    't_normalize': [0.5,0.5],
-                    },
-            type=dict,
-            help='How many CPUs to use for data loading')    
-    
-    # -------------- Experimental Hyper-parameters --------------------
+    # -------------- Experimental Hyper-parameters (Common) --------------------
     parser.add_argument('--experiment_type', 
             default='ours', 
             type=str,
             choices=['ours', 'theator'], )
-    
     
     parser.add_argument('--train_stage', 
             default='general_train', 
@@ -171,8 +150,13 @@ def parse_opts():
     parser.add_argument('--hem_extract_mode', type=str,
             default='offline',
             choices=['hem-softmax_diff_small-offline', 'hem-softmax_diff_large-offline', 'hem-voting-offline', 'hem-mi_small-offline', 'hem-mi_large-offline',
-                     'hem-emb-online', 'hem-focus-online', 'offline'],
+                     'hem-emb-online', 'offline'],
             help='Select train method, normal or hem method')
+    
+    # -------------- Experimental Hyper-parameters (Offline) --------------------
+    parser.add_argument('--top_ratio', type=float,
+            default=10/100,
+            help='Select HEM top ratio')
     
     parser.add_argument('--dropout_prob',
             default=0.3,
@@ -184,6 +168,8 @@ def parse_opts():
             type=int,
             help='?')
     
+    
+    # -------------- Experimental Hyper-parameters (Online) --------------------
     parser.add_argument('--use_comp',
             action='store_true',
             help='?')
@@ -191,6 +177,29 @@ def parse_opts():
     parser.add_argument('--emb_size',
             default=256,
             type=int,
+            help='?')
+    
+    parser.add_argument('--use_contrastive',
+            action='store_true',
+            help='?')
+    
+    parser.add_argument('--margin',
+            default=2.0,
+            type=float,
+            help='?')
+    
+    parser.add_argument('--w_lambda',
+            default=1.0,
+            type=float,
+            help='?')
+    
+    parser.add_argument('--use_step_weight',
+            action='store_true',
+            help='?')
+    
+    parser.add_argument('--alpha',
+            default=1.0,
+            type=float,
             help='?')
     
     # -------------- etc --------------------

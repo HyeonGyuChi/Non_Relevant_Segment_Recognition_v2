@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 
+from core.util.hem import HEMHelper
 from core.util.metric import MetricHelper
 
 
@@ -13,7 +14,10 @@ class Trainer():
         
     def setup(self):
         self.current_epoch = 1
+        self.current_state = 'train' # base set
     
+        print('======= Set HEM Helper =======')
+        self.hem_helper = HEMHelper(self.args)
     
         print('======= Set Metric Helper =======')
         self.metric_helper = MetricHelper(self.args)
@@ -26,9 +30,11 @@ class Trainer():
             self.metric_helper.update_epoch(epoch)
             
             # train phase
+            self.current_state = 'train'
             self.train()
             
             # validation phase
+            self.current_state = 'val'
             self.valid()
         
     def train(self):
@@ -65,15 +71,7 @@ class Trainer():
             y_hat, loss = self.forward(x, y)
             
             self.metric_helper.write_loss(loss.item(), 'valid')
-            
-            
-            # TODO 고치기
-            cls_hat = []
-            for ti in range(len(self.n_class_list)):
-                classes = torch.argmax(y_hat[ti], -1)
-                cls_hat.append(classes.reshape(-1))
-            
-            self.metric_helper.write_preds(cls_hat, y)
+            self.metric_helper.write_preds(y_hat.argmax(dim=1).detach().cpu(), y.cpu()) # MetricHelper 에 저장
             
         self.metric_helper.update_loss('valid')
         self.metric_helper.save_loss_pic()
@@ -88,39 +86,19 @@ class Trainer():
             self.save_checkpoint()
         
     def forward(self, x, y):
-        if 'online' in self.args.hem_extract_mode:
-            emb, y_hat = self.model(x)
-        else:
-            y_hat = self.model(x)
-        
-        loss = self.calc_loss(y_hat, y)
+        outputs = self.model(x)
+        loss = self.calc_loss(outputs, y)
         
         return y_hat, loss 
     
     
-    def calc_loss(self, y_hat, y):
-        # y_hat : N_task x (B x seq X C)
-        # y : B x seq x (N_task classes)
-        loss = 0
-        loss_div_cnt = 0
-
-        if 'ce' in self.args.loss_fn:
-            for ti in range(len(self.n_class_list)):
-                for seq in range(y.shape[1]):
-                    loss += self.loss_fn(y_hat[ti][:, seq, ], y[:, seq, ti])
-                loss_div_cnt += 1
-        else: # cb, bs, eqlv2
-            for ti in range(len(self.n_class_list)):
-                for seq in range(y.shape[1]):
-                    loss += self.loss_fn[ti](y_hat[ti][:, seq, :], y[:, seq, ti])
-                loss_div_cnt += 1
-                    
-            if self.args.use_normsoftmax:
-                for ti in range(len(self.n_class_list)):
-                    loss += self.loss_fn[ti+4](y_hat[4], y[:, :, ti])   
-                loss_div_cnt += 1
-            
-        loss /= loss_div_cnt
+    def calc_loss(self, outputs, y):
+        if 'online' in self.args.hem_extract_mode and self.current_state = 'train':
+            emb, y_hat = outputs
+            loss = self.hem_helper.compute_hem(self.model, x, y, self.loss_fn)
+        else:
+            y_hat = outputs
+            loss = self.loss_fn(y_hat, y)
             
         return loss
     
