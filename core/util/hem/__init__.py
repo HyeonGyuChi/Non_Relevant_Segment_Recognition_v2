@@ -10,8 +10,7 @@ __all__ = ['HEMHelper']
 
 class HEMHelper():
     """
-        Help computation ids for Hard Example Mining.
-        
+        Help computation ids for Hard Example Mining.        
     """
     def __init__(self, args):
         super().__init__()

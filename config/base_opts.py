@@ -28,7 +28,7 @@ def parse_opts():
             help='Training/Testing batch size')
     
     parser.add_argument('--n_classes',
-            default=8,
+            default=2,
             type=int,
             help='If monitor value is not updated until this value, stop training')
     
@@ -112,23 +112,44 @@ def parse_opts():
 
     # -------------- Dataset --------------------
     parser.add_argument('--dataset', 
-            default='mnist', 
+            default='robot',
             type=str, 
-            choices=['mnist', 'jigsaws', 'misaw', 'petraw'], 
-            help='choose a multimodal dataset')
+            help='choose a surgery dataset [robot / lapa]')
 
     parser.add_argument('--data_base_path',
-            default='/dataset3/multimodal',
+            default='/dataset/NRS',
             type=str,
             help='Data location')
-
-    parser.add_argument('--data_type',
-            default=['vd'],
-            type=list,
-            help='kinematic(ki), video(vd), other modality')
+    
+    parser.add_argument('--datatype',
+            default='mola',
+            type=str,
+            help='Annotation dataset version')
+    
+    parser.add_argument('--data_version',
+            default='v3',
+            type=str,
+            choices=['v1', 'v2', 'v3'],
+            help='Annotation dataset version')
+    
+    parser.add_argument('--target_fps',
+            default=1,
+            type=int,
+            help='??')
+    
+    parser.add_argument('--sample_type',
+            default='wise',
+            type=str,
+            help='??')
+    
+    parser.add_argument('--sampler',
+            default=None, # or oversampler
+            type=str,
+            help='??')
 
     parser.add_argument('--fold',
             default=1,
+            type=int,
             help='valset 1, 2, 3, 4, 5, free=for setting train_videos, val_vidoes')
 
     parser.add_argument('--num_workers',
@@ -152,6 +173,10 @@ def parse_opts():
             choices=['hem-softmax_diff_small-offline', 'hem-softmax_diff_large-offline', 'hem-voting-offline', 'hem-mi_small-offline', 'hem-mi_large-offline',
                      'hem-emb-online', 'offline'],
             help='Select train method, normal or hem method')
+    
+    parser.add_argument('--appointment_assets_path', 
+            default='', 
+            type=str,)
     
     # -------------- Experimental Hyper-parameters (Offline) --------------------
     parser.add_argument('--top_ratio', type=float,

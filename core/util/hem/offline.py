@@ -165,22 +165,22 @@ class OfflineMethod():
 
 
         # train data 수 만큼 hem data extract
-        if len(hard_pos_df) > target_nrs_cnt: hard_pos_df = hard_pos_df.sample(n=target_nrs_cnt, replace=False, random_state=self.random_seed)
-        if len(hard_neg_df) > target_rs_cnt: hard_neg_df = hard_neg_df.sample(n=target_rs_cnt, replace=False, random_state=self.random_seed) 
+        if len(hard_pos_df) > target_nrs_cnt: hard_pos_df = hard_pos_df.sample(n=target_nrs_cnt, replace=False)
+        if len(hard_neg_df) > target_rs_cnt: hard_neg_df = hard_neg_df.sample(n=target_rs_cnt, replace=False) 
 
         target_len_vanila_pos = target_nrs_cnt - len(hard_pos_df)
         target_len_vanila_neg = target_rs_cnt - len(hard_neg_df)
 
         
         try:
-            vanila_pos_df = vanila_pos_df.sample(n=target_len_vanila_pos, replace=False, random_state=self.random_seed) # 중복뽑기x, random seed 고정, hem_oob 개
+            vanila_pos_df = vanila_pos_df.sample(n=target_len_vanila_pos, replace=False) # 중복뽑기x, random seed 고정, hem_oob 개
         except:
-            vanila_pos_df = vanila_pos_df.sample(frac=1, replace=False, random_state=self.random_seed) # 중복뽑기x, random seed 고정, 전체 oob_df
+            vanila_pos_df = vanila_pos_df.sample(frac=1, replace=False) # 중복뽑기x, random seed 고정, 전체 oob_df
 
         try:
-            vanila_neg_df = vanila_neg_df.sample(n=target_len_vanila_neg, replace=False, random_state=self.random_seed) # 중복뽑기x, random seed 고정, target_ib_assets_df_len 개
+            vanila_neg_df = vanila_neg_df.sample(n=target_len_vanila_neg, replace=False) # 중복뽑기x, random seed 고정, target_ib_assets_df_len 개
         except:
-            vanila_neg_df = vanila_neg_df.sample(frac=1, replace=False, random_state=self.random_seed)
+            vanila_neg_df = vanila_neg_df.sample(frac=1, replace=False)
 
         final_pos_assets_df = pd.concat([hard_pos_df, vanila_pos_df])[['Img_path', 'GT', 'HEM']]
         final_neg_assets_df = pd.concat([hard_neg_df, vanila_neg_df])[['Img_path', 'GT', 'HEM']]
@@ -189,7 +189,7 @@ class OfflineMethod():
         final_assets_df = pd.concat([final_pos_assets_df, final_neg_assets_df]).sort_values(by='Img_path', axis=0, ignore_index=True)
         print('\tSORT final_assets HEAD\n', final_assets_df.head(20), '\n\n')
 
-        final_assets_df = final_assets_df.sample(frac=1, random_state=self.random_seed).reset_index(drop=True)
+        final_assets_df = final_assets_df.sample(frac=1).reset_index(drop=True)
         print('\tSHUFFLE final_assets HEAD\n', final_assets_df.head(20), '\n\n')
         
         final_assets_df.columns = ['img_path', 'class_idx', 'HEM']
@@ -233,8 +233,7 @@ class OfflineMethod():
 
         return hard_neg_df, hard_pos_df, vanila_neg_df, vanila_pos_df
         
-        
-     def cal_mutual_info(self, dropout_predictions):
+    def cal_mutual_info(self, dropout_predictions):
         # dropout_predictinos (1, 46086, 2)
         # H(X), H(Y)
         epsilon = sys.float_info.min

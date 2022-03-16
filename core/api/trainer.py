@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-
+from core.dataset import load_data
 from core.util.hem import HEMHelper
 from core.util.metric import MetricHelper
 
@@ -9,12 +9,15 @@ from core.util.metric import MetricHelper
 
 class Trainer():
     def __init__(self, args):
-        self.args = args
-        
+        self.args = args        
+        self.setup()
         
     def setup(self):
         self.current_epoch = 1
         self.current_state = 'train' # base set
+    
+        print('======= Load dataset =======')
+        self.train_laoder, self.val_loader = load_data(self.args)
     
         print('======= Set HEM Helper =======')
         self.hem_helper = HEMHelper(self.args)
@@ -93,7 +96,7 @@ class Trainer():
     
     
     def calc_loss(self, outputs, y):
-        if 'online' in self.args.hem_extract_mode and self.current_state = 'train':
+        if 'online' in self.args.hem_extract_mode and self.current_state == 'train':
             emb, y_hat = outputs
             loss = self.hem_helper.compute_hem(self.model, x, y, self.loss_fn)
         else:
