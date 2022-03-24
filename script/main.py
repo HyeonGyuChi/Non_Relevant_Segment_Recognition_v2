@@ -4,7 +4,7 @@ def main():
     from core.api.trainer import Trainer
     from core.api.inference import InferenceDB
     from core.api.evaluation import Evaluator
-    from core.util.parser import AssetParser
+    from core.util.visualization import VisualTool
     
     parser = parse_opts()
     args = parser.parse_args()
@@ -13,7 +13,7 @@ def main():
     trainer = Trainer(args)
     trainer.fit()
     
-    # # inference
+    # inference
     args.restore_path = trainer.args.save_path
     
     infer = InferenceDB(args)
@@ -21,17 +21,15 @@ def main():
     infer.set_inference_interval(args.inference_interval)
     results = infer.inference()
     
+    # evaluation
     evaluator = Evaluator(args)
     evaluator.set_inference_interval(args.inference_interval)
     evaluator.evaluation(results_dict=results)
     
-    
-    # TODO 여기서 한 번에 하는게 맞을까..?
-    # visualization per patients
-    # patient_predict_visual_path = os.path.join(each_patients_save_dir, 'predict-{}.png'.format(patient_no))
-
-    # visual_tool = VisualTool(patient_gt_list, patient_no, patient_predict_visual_path)
-    # visual_tool.visual_predict(patient_predict_list, self.model, self.inference_interval, window_size=300, section_num=2)
+    # visualize
+    visual_tool = VisualTool(args)
+    visual_tool.set_result_path('{}/inference_results'.format(args.save_path))
+    visual_tool.visualize()
 
 
 if __name__ == '__main__':
