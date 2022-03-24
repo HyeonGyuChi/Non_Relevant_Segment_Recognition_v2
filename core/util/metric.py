@@ -97,6 +97,9 @@ class MetricHelper():
         metrics['gt_OOB']= gt_list.count(self.OOB_CLASS)
         metrics['predict_IB']= pred_list.count(self.IB_CLASS)
         metrics['predict_OOB']= pred_list.count(self.OOB_CLASS)
+        
+        if len(self.loss_dict['valid']) > 0:
+            metrics['val_loss'] = self.loss_dict['valid'][-1]
                 
         # exception
         for k, v in metrics.items():
@@ -106,7 +109,7 @@ class MetricHelper():
                 metrics[k] = self.EXCEPTION_NUM
     
         # save accuracy
-        self.results[self.epoch-1, idx] = metrics['Mean_metric']
+        self.results[self.epoch-1] = metrics['Mean_metric']
         self.output_dict['gt'] = []
         self.output_dict['pred'] = []
         
@@ -195,14 +198,8 @@ class MetricHelper():
         plt.legend(['Train', 'Val'], fontsize=40)
         plt.savefig(self.args.save_path + '/loss.png')
         
-        
     def update_best_metric(self, metric):
-        target_met = 0    
-        
-        for met in metric:
-            target_met += met[self.target_metric]
-            
-        target_met /= len(metric)
+        target_met = metric[self.target_metric]
         
         if 'loss' in self.target_metric:    
             if self.best_metric > target_met:

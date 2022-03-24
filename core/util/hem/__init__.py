@@ -1,11 +1,9 @@
-
-
-
-
 from core.util.hem.offline import *
 from core.util.hem.online import *
 
-__all__ = ['HEMHelper']
+__all__ = [
+    'HEMHelper', 'OnlineHEM', 'OfflineHEM',
+]
 
 
 class HEMHelper():
@@ -23,13 +21,13 @@ class HEMHelper():
                                 'hem-mi_small-offline', 
                                 'hem-mi_large-offline']
         
-        self.set_method()
+        self.method = self.args.hem_extract_mode
         
-    def set_method(self):
+    def set_method(self, method):
         if self.args.hem_extract_mode in self.offline_methods:
             self.method = method # 'hem-vi-offline'
         else:
-            self.method = method
+            self.method = self.args.hem_extract_mode
             
     def compute_hem(self, *args):
         if 'online' in self.method:

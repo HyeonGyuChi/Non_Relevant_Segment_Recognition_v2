@@ -137,14 +137,29 @@ def parse_opts():
             type=int,
             help='??')
     
+    parser.add_argument('--sample_ratio',
+            default=30,
+            type=int,
+            help='??')
+    
     parser.add_argument('--sample_type',
-            default='wise',
+            default='boundary',
             type=str,
             help='??')
     
     parser.add_argument('--sampler',
             default=None, # or oversampler
             type=str,
+            help='??')
+    
+    parser.add_argument('--IB_ratio',
+            default=3,
+            type=float,
+            help='??')
+    
+    parser.add_argument('--WS_ratio',
+            default=4,
+            type=int,
             help='??')
 
     parser.add_argument('--fold',
@@ -193,8 +208,22 @@ def parse_opts():
             type=int,
             help='?')
     
+    parser.add_argument('--n_stage',
+            default=2,
+            type=int,
+            help='?')
+    
+    parser.add_argument('--n_mini_fold',
+            default=4,
+            type=int,
+            help='?')
     
     # -------------- Experimental Hyper-parameters (Online) --------------------
+    parser.add_argument('--online_type',
+            default=1,
+            type=int,
+            help='?')
+    
     parser.add_argument('--use_comp',
             action='store_true',
             help='?')
@@ -231,5 +260,9 @@ def parse_opts():
     parser.add_argument('--random_seed', type=int, default=3829, help='dataset random seed')
 
     parser.add_argument('--save_top_n', type=int, default=3, help='save best top N models')
+    
+    parser.add_argument('--inference_interval', type=int, 
+                        default=30,
+                        help='Inference Interval of frame')
         
     return parser

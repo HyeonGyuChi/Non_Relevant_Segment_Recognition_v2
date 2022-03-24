@@ -1,0 +1,8 @@
+# logs 
+logs*
+
+# python
+__pycache__
+
+# .out
+**.out
