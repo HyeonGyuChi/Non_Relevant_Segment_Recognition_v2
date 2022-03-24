@@ -84,7 +84,7 @@ class InferenceDB():
                 # inferencing model
                 for sample in tqdm(dl, desc='Inferencing... \t ==> {}'.format(video_name)) :
                     batch_input = sample['img'].cuda()
-                    batch_output = self.model(batch_input)
+                    batch_output = self.forward(batch_input)
 
                     # predict
                     batch_predict = torch.argmax(batch_output.cpu(), 1)
@@ -113,6 +113,14 @@ class InferenceDB():
                 results[patient][video_name] = predict_df
             
         return results
+    
+    def forward(self, batch_input):
+        if 'online' in  self.args.hem_extract_mode:
+            _, batch_output = self.model(batch_input)
+        else:
+            batch_output = self.model(batch_input)
+            
+        return batch_output
 
     
     def save_results(self, predict_df, each_patients_save_dir, video_name):

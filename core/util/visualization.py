@@ -201,6 +201,34 @@ class VisualTool():
         plt.savefig(save_path, format='png', dpi=500)
         plt.close(fig)
         
+    def _get_plt(self, visual_type):
+        assert visual_type in ['predict', 'predict_multi', 'sampling'], 'NOT SUPPORT VISUAL MODE'
+
+        if visual_type == 'predict':
+            fig, ax = plt.subplots(3,1,figsize=(18,15)) # 1x1 figure matrix 생성, figsize=(가로, 세로) 크기지정
+
+            plt.subplots_adjust(left=0.125,
+                    bottom=0.1, 
+                    right=0.9, 
+                    top=0.9, 
+                    wspace=0, 
+                    hspace=0.35)
+
+        if visual_type == 'predict_multi':
+            fig, ax = plt.subplots(1,1,figsize=(30,7)) # 1x1 figure matrix 생성, figsize=(가로, 세로) 크기지정
+
+            plt.subplots_adjust(left=0.125,
+                    bottom=0.1, 
+                    right=0.9, 
+                    top=0.9, 
+                    wspace=0, 
+                    hspace=0.35)
+
+        elif visual_type == 'sampling':
+            fig, ax = plt.subplots(2,1,figsize=(18,14)) # 2x1 figure matrix 생성, 가로(18인치)x세로(13인치) 크기지정
+
+        return fig, ax
+        
     def calc_section_metrics(self, gt_list, predict_list):
         metrics_per_section = {
             'start_idx':[],

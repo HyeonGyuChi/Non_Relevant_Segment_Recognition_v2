@@ -162,7 +162,6 @@ class Trainer():
         if 'online' in self.args.hem_extract_mode and self.current_state == 'train':
             emb, y_hat = outputs
             loss = self.hem_helper.apply(emb, y_hat, y, self.model.proxies)
-            # loss = self.hem_helper.compute_hem(emb, y_hat, y, self.model.proxies)
         else:
             y_hat = outputs
             loss = self.loss_fn(y_hat, y)
