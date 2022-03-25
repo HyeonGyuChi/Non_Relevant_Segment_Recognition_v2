@@ -11,7 +11,6 @@ from glob import glob
 
 from core.dataset.fold_robot import *
 # from core.dataset.fold_lapa import *
-from core.util.parser import FileLoader, InfoParser, AnnotationParser
 
 
 
