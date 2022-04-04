@@ -155,7 +155,6 @@ class AssetParser():
                     self.data_dict[patient_no][video_name]['img'] = [img_path]
                     self.data_dict[patient_no][video_name]['anno'] = [label]
                  
-        
     def load_img_path_list_only(self):
         patients_list = natsort.natsorted(os.listdir(self.img_base_path))
         
