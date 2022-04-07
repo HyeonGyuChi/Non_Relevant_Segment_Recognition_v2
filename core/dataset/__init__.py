@@ -1,12 +1,12 @@
 from torch.utils.data import DataLoader
 from core.util.sampler import OverSampler
 from core.dataset.robot_dataset import RobotDataset
-# from core.dataset.lapa_dataset import LapaDataset
+from core.dataset.lapa_dataset import LapaDataset
 from core.dataset.infer_dataset import InferDataset
 
 
 __all__ = [
-    'load_data', 'RobotDataset', #'LapaDataset',
+    'load_data', 'RobotDataset', 'LapaDataset',
     'InferDataset',
 ]
 
@@ -17,7 +17,8 @@ def load_data(args):
         valset = RobotDataset(args, state='val', sample_type=args.sample_type)
         
     elif args.dataset == 'lapa':
-        pass
+        trainset = LapaDataset(args, state='train', sample_type=args.sample_type)
+        valset = LapaDataset(args, state='val', sample_type=args.sample_type)
     
     if args.sampler == 'oversampler':
         train_loader = DataLoader(trainset,

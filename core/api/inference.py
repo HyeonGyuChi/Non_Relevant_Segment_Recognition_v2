@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from core.model import get_model
 from core.dataset import InferDataset
 from core.util.parser import AssetParser
-from core.util.sampler import IntervalSampler
+# from core.util.sampler import IntervalSampler
 from core.util.misc import *
 
 
@@ -95,6 +95,7 @@ class InferenceDB():
                     target_img_list += sample['img_path'] # target img path
                     target_frame_idx_list += sample['db_idx'] # target DB
 
+                print("target_frame_idx_list",target_frame_idx_list)
                 target_frame_idx_list = list(map(int, target_frame_idx_list)) # '0000000001' -> 1
                 
                 gt_list = data[1]

@@ -28,6 +28,7 @@ class RobotDataset(Dataset):
         self.ap = AssetParser(self.args, state=self.state)
         self.load_data()
         
+        
         # augmentation setup
         if self.args.experiment_type == 'ours':
             if self.args.model == 'mobile_vit':
@@ -57,7 +58,7 @@ class RobotDataset(Dataset):
         
         patient_data = self.ap.get_patient_assets()
         anno_df_list = []
-        
+        print("load_data_patient_data..items()",patient_data.items())
         for patient, data in patient_data.items():
             anno_df = pd.DataFrame({
                 'img_path': data[0],

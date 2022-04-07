@@ -54,7 +54,7 @@ def parse_opts():
             help='What device to use for training or validation model')
 
     parser.add_argument('--cuda_list',
-            default='0',
+            default='7',
             type=str,
             help='Name list of gpus that are used to train')
 
@@ -112,19 +112,21 @@ def parse_opts():
 
     # -------------- Dataset --------------------
     parser.add_argument('--dataset', 
-            default='robot',
+            default='lapa',
             type=str, 
             help='choose a surgery dataset [robot / lapa]')
-
-    parser.add_argument('--data_base_path',
-            default='/dataset/NRS',
-            type=str,
-            help='Data location')
     
     parser.add_argument('--datatype',
-            default='mola',
+            default='vihub',
             type=str,
-            help='Annotation dataset version')
+            help='Annotation dataset version [ mola / vihub ]'),
+    
+
+    parser.add_argument('--data_base_path',
+            default='../core/dataset/NRS',
+            type=str,
+            help='Data location')
+
     
     parser.add_argument('--data_version',
             default='v3',
@@ -168,7 +170,7 @@ def parse_opts():
             help='valset 1, 2, 3, 4, 5, free=for setting train_videos, val_vidoes')
 
     parser.add_argument('--num_workers',
-            default=6,
+            default=2,
             type=int,
             help='How many CPUs to use for data loading')
     

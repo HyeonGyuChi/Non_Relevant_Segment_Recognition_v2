@@ -1,4 +1,5 @@
 from core.model.timm_model import generate_timm_model
+import torch
 
 
 name_to_model = {
