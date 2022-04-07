@@ -8,7 +8,8 @@ import torch.nn as nn
 
 from core.model import get_model, get_loss, configure_optimizer
 from core.dataset import load_data
-from core.util.hem import HEMHelper, OnlineHEM
+# from core.util.hem import HEMHelper, OnlineHEM
+from core.util.hem import OnlineHEM
 from core.util.metric import MetricHelper
 
 

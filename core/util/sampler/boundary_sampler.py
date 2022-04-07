@@ -30,16 +30,23 @@ class BoundarySampler():
         # 전체 환자에 대한 리스트
         self.class_idx_list = data['class_idx'].tolist()
         self.class_idx_len = len(self.class_idx_list)
+        # print("self.class_idx_list",self.class_idx_list)
+        # print("self.class_idx_len",self.class_idx_len)
 
         # print('[TOTAL GT] class_idx_len : {}'.format(self.class_idx_len))
         
         patient_df = data
+        # print("first patient_df\n",patient_df)
         ##### 1. Calculate NRS (Non Related Surgery) start_idx, end_idx [[30, 38], [50, 100], [150, 157], ... ,[497679, 497828]] per patient
+        # print("patient_df['class_idx']\n",patient_df['class_idx'])
         nrs_start_end_idx_list = self.calc_nrs_idx(patient_df['class_idx'])
         
         ##### 2. Select RS (Wise-Related Surgery) idx per patient
         patient_df = self.extract_wise_rs_idx(patient_df, nrs_start_end_idx_list)
+        # print("second patient_df\n",patient_df)
+
         final_patients_df = patient_df[['img_path', 'class_idx', 'wise_rs']] 
+        # print("final_patients_df\n",final_patients_df)
 
         return self.set_ratio(final_patients_df)
         
@@ -56,7 +63,8 @@ class BoundarySampler():
         
         # arrange data
         runlength_df = pd.DataFrame(range(0,0)) # empty df
-        runlength_df = runlength_df.append(encode_df)
+        runlength_df = runlength_df.append(encode_df) #pd.concat로 수정 권장 (warning)
+
 
         # Nan -> 0, convert to int
         runlength_df = runlength_df.fillna(0).astype(int)
@@ -130,6 +138,7 @@ class BoundarySampler():
         return patient_df
 
     def set_ratio(self, final_patients_df):
+        # print("start set_ratio")
         ##### 3. Set ratio
         assets_nrs_df = final_patients_df[final_patients_df['class_idx']==1]
 
@@ -146,6 +155,5 @@ class BoundarySampler():
 
         # print('\nself.assets_nrs_df\n', assets_nrs_df)
         # print('\nself.assets_rs_df\n', assets_rs_df)
-        # print('\nself.final_assets\n', final_assets)
 
         return final_assets

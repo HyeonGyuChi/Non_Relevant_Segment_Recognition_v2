@@ -1,0 +1,69 @@
+art==5.5
+backcall==0.2.0
+beautifulsoup4 @ file:///home/linux1/recipes/ci/beautifulsoup4_1610988766420/work
+brotlipy==0.7.0
+certifi==2020.12.5
+cffi @ file:///tmp/build/80754af9/cffi_1605538068321/work
+chardet @ file:///tmp/build/80754af9/chardet_1605303185383/work
+conda==4.9.2
+conda-build==3.21.4
+conda-package-handling @ file:///tmp/build/80754af9/conda-package-handling_1603018141399/work
+cryptography @ file:///tmp/build/80754af9/cryptography_1605544487601/work
+cycler==0.11.0
+decorator==4.4.2
+dnspython==2.1.0
+einops==0.4.1
+filelock @ file:///home/linux1/recipes/ci/filelock_1610993975404/work
+fonttools==4.31.2
+glob2 @ file:///home/linux1/recipes/ci/glob2_1610991677669/work
+idna @ file:///tmp/build/80754af9/idna_1593446292537/work
+ipython @ file:///tmp/build/80754af9/ipython_1610724799192/work
+ipython-genutils @ file:///tmp/build/80754af9/ipython_genutils_1606773439826/work
+jedi @ file:///tmp/build/80754af9/jedi_1606932564285/work
+Jinja2 @ file:///home/linux1/recipes/ci/jinja2_1610990516718/work
+kiwisolver==1.4.2
+libarchive-c @ file:///home/linux1/recipes/ci/python-libarchive-c_1610974153025/work
+MarkupSafe==1.1.1
+matplotlib==3.5.1
+mkl-fft==1.2.0
+mkl-random==1.1.1
+mkl-service==2.3.0
+natsort==8.1.0
+numpy @ file:///tmp/build/80754af9/numpy_and_numpy_base_1603570489231/work
+olefile==0.46
+packaging==21.3
+pandas==1.4.2
+parso==0.7.0
+pexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work
+pickleshare @ file:///tmp/build/80754af9/pickleshare_1606932040724/work
+Pillow @ file:///tmp/build/80754af9/pillow_1609786786540/work
+pkginfo==1.7.0
+prompt-toolkit @ file:///tmp/build/80754af9/prompt-toolkit_1602688806899/work
+psutil @ file:///tmp/build/80754af9/psutil_1598370257551/work
+ptyprocess @ file:///tmp/build/80754af9/ptyprocess_1609355006118/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
+pycm==3.4
+pycosat==0.6.3
+pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
+Pygments @ file:///tmp/build/80754af9/pygments_1610565767015/work
+pyOpenSSL @ file:///tmp/build/80754af9/pyopenssl_1605545627475/work
+pyparsing==3.0.7
+PySocks @ file:///tmp/build/80754af9/pysocks_1605305779399/work
+python-dateutil==2.8.2
+python-etcd==0.4.5
+pytorch-ranger==0.1.1
+pytz @ file:///tmp/build/80754af9/pytz_1608922264688/work
+PyYAML==5.3.1
+requests @ file:///tmp/build/80754af9/requests_1592841827918/work
+ruamel_yaml==0.15.87
+six @ file:///tmp/build/80754af9/six_1605205327372/work
+soupsieve @ file:///tmp/build/80754af9/soupsieve_1607965878077/work
+timm==0.5.4
+torch==1.7.1
+torch-optimizer==0.3.0
+torchelastic==0.2.1
+torchvision==0.8.2
+tqdm @ file:///tmp/build/80754af9/tqdm_1605303662894/work
+traitlets @ file:///tmp/build/80754af9/traitlets_1602787416690/work
+typing-extensions @ file:///tmp/build/80754af9/typing_extensions_1598376058250/work
+urllib3 @ file:///tmp/build/80754af9/urllib3_1603305693037/work
+wcwidth @ file:///tmp/build/80754af9/wcwidth_1593447189090/work
