@@ -3,11 +3,12 @@ from core.util.sampler import OverSampler
 from core.dataset.robot_dataset import RobotDataset
 from core.dataset.lapa_dataset import LapaDataset
 from core.dataset.infer_dataset import InferDataset
+from core.dataset.sub_dataset import SubDataset
 
 
 __all__ = [
     'load_data', 'RobotDataset', 'LapaDataset',
-    'InferDataset',
+    'InferDataset', 'SubDataset',
 ]
 
 

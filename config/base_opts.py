@@ -266,5 +266,10 @@ def parse_opts():
     parser.add_argument('--inference_interval', type=int, 
                         default=30,
                         help='Inference Interval of frame')
+
+    parser.add_argument('--db_path',
+            default='/dataset/NRS/meta_info.db',
+            type=str,
+            help='Data location')
         
     return parser
