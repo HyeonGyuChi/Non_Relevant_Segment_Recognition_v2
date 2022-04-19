@@ -132,14 +132,6 @@ class AssetParser():
             self.load_img_path_list()
             self.make_anno()
 
-    def load_data_autolabel(self,new_patient_list):
-        self.new_patient_list=new_patient_list
-        if self.args.appointment_assets_path != '' and \
-            (self.state == 'train' or 'mini' in self.args.train_stage):
-            self.load_data_from_path()
-        else:
-            self.load_img_path_list_autolabel(self.new_patient_list)
-            self.make_anno()
         
     def load_data_from_path(self):
         appointment_assets_df = pd.read_csv(self.args.appointment_assets_path)
@@ -220,29 +212,6 @@ class AssetParser():
                         video_name: {'img': file_list}
                     }
 
-    def load_img_path_list_autolabel(self,new_patient_list):
-        for patient in tqdm(new_patient_list):
-            base_path = "../core/dataset/NRS/toyset"
-            p_path = base_path + f'/{patient}'
-            video_list = natsort.natsorted(os.listdir(p_path))
-            
-            for video_name in video_list:
-                v_path = p_path + f'/{video_name}'
-                img_file = v_path+"/img"
-                img_file_list = sorted(os.listdir(img_file))
-            
-                for fi, fname in enumerate(img_file_list):
-                    img_file_list[fi] = v_path +"/img"+ f'/{fname}'
-                
-                if self.args.sample_ratio > 1:
-                    img_file_list = img_file_list[::self.args.sample_ratio]
-                
-                if patient in self.data_dict:
-                    self.data_dict[patient][video_name] = {'img': img_file_list}
-                else:
-                    self.data_dict[patient] = {
-                        video_name: {'img': img_file_list}
-                    }
 
     def make_anno(self):
         anno_list = natsort.natsorted(glob(self.anno_path + '/*.json'))
