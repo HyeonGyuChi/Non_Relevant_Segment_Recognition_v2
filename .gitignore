@@ -6,4 +6,4 @@ __pycache__
 
 # .out
 **.out
-/home/jiwoo/NRS/core/dataset/infer_dataset.py
+core/dataset/infer_dataset.py
