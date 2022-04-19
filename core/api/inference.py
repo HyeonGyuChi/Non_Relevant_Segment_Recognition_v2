@@ -241,15 +241,11 @@ class InferenceDB():
 
 
         # make json
-        # print("RESULT: \n",results)
         new_data_patient = list(results.keys())
         for i in range(len(new_data_patient)):
-            # print("new_data_patient",new_data_patient[i])
             new_data_video = list(results.get(new_data_patient[i]))
-            # print("new_data_video",new_data_video)
             for j in range(len(new_data_video)):
                 new_data_video_value=(results.get(new_data_patient[i]).get(new_data_video[j]))
-                # print("new_data_video_value",new_data_video_value)
                 new_data_totalframe=len(new_data_video_value[0])
                 new_data_label=new_data_video_value[1]
 
@@ -282,14 +278,12 @@ class InferenceDB():
                 "createdAt":"",              #2021-12-07T22:49:05.723Z",
                 "updatedAt": "", #2021-01-02 22:41:10.181418
                 "annotator": "30",
-                "name": new_data_video,
+                "name": new_data_video[j],
                 "label": {"1": "NonRelevantSurgery"}
                 }
-                # print("new_json",new_json)
 
 
                 json_path="../core/dataset/NRS/toyset/"+new_data_patient[i]+"/"+new_data_video[j]+"/anno/v1"
-                # print("json_path",json_path)
                 if os.path.exists(json_path):
                     pass
                 else:
@@ -298,8 +292,8 @@ class InferenceDB():
                 if "R_" in json_path:
                     json_name = json_path + "/"+ new_data_video[j] + "_TBE_30.json"
                     print("json_name", json_name)                     
-                    with open(json_path, 'w') as f:
-                        json.dump(json_name, f)
+                    with open(json_name, 'w') as f:
+                        json.dump(new_json, f)
                 elif "L_" in json_path:
                     json_name = json_path + "/"+ new_data_video[j] + "_NRS_30.json"
                     print("json_name", json_name)
