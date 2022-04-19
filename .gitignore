@@ -6,6 +6,6 @@ __pycache__
 
 # .out
 **.out
-NRS/core/dataset/json_cover.py
-NRS/core/api/inference.py
-NRS/core/api/trainer.py
+core/dataset/json_cover.py
+core/api/inference.py
+core/api/trainer.py
