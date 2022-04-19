@@ -30,9 +30,9 @@ def main():
     results = infer.inference_autolabel()
 
     #### DB UPDATE
-    db_helper.update_no_anno(
+    db_helper.update(
         [['ANNOTATION_V1', 1],],
-        "ANNOTATION_V1=False",
+        ["ANNOTATION_V1=False"],
     )
     AFTER_df = db_helper.select(cond_info=None)
     print(AFTER_df)

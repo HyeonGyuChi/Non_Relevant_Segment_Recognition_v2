@@ -61,7 +61,6 @@ class DBHelper():
         if cond_info is not None:
             cond = 'WHERE '
             req = ''
-
             for idx, _info in enumerate(cond_info):
                 cond += '{}'.format(_info)
 
@@ -81,21 +80,21 @@ class DBHelper():
         self.cursor.execute(cmd)
         self.connector.commit()
 
-    def update_no_anno(self, replace_data, cond_info):
-        if cond_info is not None:
-            cond = 'WHERE '+cond_info
-            req = ''
-            for idx, _info in enumerate(replace_data):
-                req += '{} = {}'.format(*_info)
+    # def update_no_anno(self, replace_data, cond_info):
+    #     if cond_info is not None:
+    #         cond = 'WHERE '+cond_info
+    #         req = ''
+    #         for idx, _info in enumerate(replace_data):
+    #             req += '{} = {}'.format(*_info)
 
-                if idx+1 != len(replace_data):
-                    req += ', '
-            cmd = 'UPDATE {} SET {} {}'.format(self.table_name, req, cond)
-        else:
-            raise 'Error! not found where condition'
+    #             if idx+1 != len(replace_data):
+    #                 req += ', '
+    #         cmd = 'UPDATE {} SET {} {}'.format(self.table_name, req, cond)
+    #     else:
+    #         raise 'Error! not found where condition'
 
-        self.cursor.execute(cmd)
-        self.connector.commit()
+    #     self.cursor.execute(cmd)
+    #     self.connector.commit()
 
     def update_table_elements(self):
         pass
