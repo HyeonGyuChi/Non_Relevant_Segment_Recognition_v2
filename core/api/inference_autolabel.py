@@ -41,6 +41,7 @@ class InferenceDB_autolabel():
         tokens = video_name.split('_')
         # search patient number
         for ti, token in enumerate(tokens):
+            global patient_num
             if self.args.dataset == 'robot':
                 if token == 'R':
                     patient_num = 'R_' + tokens[ti+1]
@@ -233,6 +234,8 @@ class InferenceDB_autolabel():
             for j in range(len(new_data_video)):
                 new_data_video_value=(results.get(new_data_patient[i]).get(new_data_video[j]))
                 new_data_totalframe=len(new_data_video_value[0])
+                surgery = new_data_video_value[0][0].split("/")[5]
+                surgery_type = new_data_video_value[0][0].split("/")[6]
                 new_data_label=new_data_video_value[1]
 
                 new_data_anno=[]
@@ -269,7 +272,7 @@ class InferenceDB_autolabel():
                 }
 
 
-                json_path="../core/dataset/NRS/toyset/"+new_data_patient[i]+"/"+new_data_video[j]+"/anno/v1"
+                json_path="../core/dataset/NRS/toyset/"+surgery+"/"+ surgery_type +"/"+new_data_patient[i]+"/"+new_data_video[j]+"/anno/v1"
                 if os.path.exists(json_path):
                     pass
                 else:
@@ -278,13 +281,13 @@ class InferenceDB_autolabel():
                 if "R_" in json_path:
                     json_name = json_path + "/"+ new_data_video[j] + "_TBE_30.json"
                     print("json_name", json_name)                     
-                    # with open(json_name, 'w') as f:
-                    #     json.dump(new_json, f)
+                    with open(json_name, 'w') as f:
+                        json.dump(new_json, f)
                 elif "L_" in json_path:
                     json_name = json_path + "/"+ new_data_video[j] + "_NRS_30.json"
                     print("json_name", json_name)
-                    # with open(json_name, 'w') as f:
-                    #     json.dump(new_json, f)
+                    with open(json_name, 'w') as f:
+                        json.dump(new_json, f)
 
     
     def forward(self, batch_input):
