@@ -194,14 +194,6 @@ def parse_opts():
     parser.add_argument('--appointment_assets_path', 
             default='', 
             type=str,)
-
-
-    parser.add_argument('--train_state', 
-            default='train', 
-            type=str,)
-    parser.add_argument('--val_state', 
-            default='val', 
-            type=str,)
     
     # -------------- Experimental Hyper-parameters (Offline) --------------------
     parser.add_argument('--top_ratio', type=float,
