@@ -5,16 +5,14 @@ from glob import glob
 import natsort
 import torch
 import torch.nn as nn
-
 from core.model import get_model, get_loss, configure_optimizer
 from core.dataset import load_data
 # from core.util.hem import HEMHelper, OnlineHEM
 from core.util.hem import OnlineHEM
 from core.util.metric import MetricHelper
-
-
 from torch.utils.data import DataLoader
 from core.dataset import SubDataset
+
 import torchvision
 from torchvision.models import resnet18
 
@@ -22,17 +20,14 @@ def pretrained_resnet50():
         model = torchvision.models.resnet50(pretrained=True)
         num_ftrs = model.fc.in_features
         model.fc = nn.Linear(num_ftrs, 2)
-
         return model
 
 class Trainer():
-    
     def __init__(self, args):
         self.args = args        
         self.setup()
     
     def setup(self):
-        os.environ['CUDA_VISIBLE_DEVICES'] = self.args.cuda_list
         self.current_epoch = 1
         self.current_state = 'train' # base set
         
@@ -50,8 +45,31 @@ class Trainer():
         self.optimizer, self.scheduler = configure_optimizer(self.args, self.model)
     
         print('======= Load dataset =======')
-        self.train_loader, self.val_loader = load_data(self.args)
-        print("Train Data:",len(self.train_loader), "Validation Data:",len(self.val_loader)) 
+        trainset = SubDataset(self.args, state='train', sample_type=self.args.sample_type)
+        valset   = SubDataset(self.args, state='val', sample_type=self.args.sample_type)
+        
+        if self.args.sampler == 'oversampler':
+            self.train_loader = DataLoader(trainset,
+                                    batch_size=self.args.batch_size,
+                                    num_workers=self.args.num_workers,
+                                    sampler=OverSampler(trainset.label_list, self.args.batch_size//2, self.args.batch_size),
+                                    pin_memory=True,
+                                    )
+        else:
+            self.train_loader = DataLoader(trainset,
+                                batch_size=self.args.batch_size,
+                                num_workers=self.args.num_workers,
+                                shuffle=True,
+                                pin_memory=True,
+                                )
+        
+        self.val_loader = DataLoader(valset,
+                                batch_size=self.args.batch_size,
+                                num_workers=self.args.num_workers,
+                                shuffle=False,
+                                pin_memory=True,
+                                )
+        print("Train Data:        ",len(self.train_loader), "\nValidation Data:",len(self.val_loader)) 
 
         print('======= Set HEM Helper =======')
         self.hem_helper = OnlineHEM(self.args)

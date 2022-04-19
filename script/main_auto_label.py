@@ -1,33 +1,33 @@
 def main():
     import os
+    import torch
     from config.base_opts import parse_opts
     from core.util.database import DBHelper
     from config.meta_db_config import subset_condition
     import warnings
-    from core.api.inference import new_data_inference
-    import torch
+    from core.api.inference_autolabel import InferenceDB
+    from core.api.trainer_autolabel import Trainer
     warnings.filterwarnings("ignore")
 
     parser = parse_opts()
     args = parser.parse_args()
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda_list
+    
     db_helper = DBHelper(args)
     db_helper.remove_table()
     db_helper.make_table()
     db_helper.random_attr_generation()
     
-    #### NEW DATA CHECK
-    BEFORE_df=db_helper.select_no_anno(cond_info="ANNOTATION_V1=False")
-    print(BEFORE_df)
+    # training
+    autolabel_trainer = Trainer(args)
+    autolabel_trainer.fit()
 
-    
-    new_patient_list=BEFORE_df['PATIENT'].tolist()
-    new_patient_path_list=[]
-    for i in range(len(BEFORE_df['PATIENT'].tolist())):
-        new_patient_path = BEFORE_df['SURGERY'][i]+"/"+BEFORE_df['SURGERY_TYPE'][i]+"/"+BEFORE_df['PATIENT'][i]
-        new_patient_path_list.append(new_patient_path)
-
-    #### NEW DATA INFERENCE
-    new_data_inference(new_patient_path_list)
+    # inference + make json
+    args.restore_path =autolabel_trainer.args.save_path    
+    infer = InferenceDB(args)
+    infer.load_model()
+    infer.set_inference_interval(args.inference_interval)
+    results = infer.inference_new()
 
     #### DB UPDATE
     db_helper.update_no_anno(
@@ -41,7 +41,7 @@ def main():
 if __name__ == '__main__':
     if __package__ is None:
         import sys
-        from os import path    
+        from os import path
         base_path = path.dirname(path.dirname(path.abspath(__file__)))
         sys.path.append(base_path)
     

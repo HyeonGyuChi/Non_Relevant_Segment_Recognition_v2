@@ -5,25 +5,22 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from core.model import get_model
+from core.dataset import SubDataset
 from core.dataset import InferDataset
 from core.util.parser import AssetParser
+from core.util.parser import DBParser
 # from core.util.sampler import IntervalSampler
 from core.util.misc import *
 
-from core.api.trainer import Trainer,pretrained_resnet50
 
 class InferenceDB():
-
-
     def __init__(self, args):
         self.args = args
         self.ap = AssetParser(self.args, state='val')
+        self.dp = DBParser(self.args, state='test')
         self.dset = InferDataset(self.args)
-        os.environ['CUDA_VISIBLE_DEVICES'] = self.args.cuda_list
-
 
     def load_model(self):
-        os.environ['CUDA_VISIBLE_DEVICES'] = self.args.cuda_list
         model_path = get_inference_model_path(self.args.restore_path, load_type='best')
         ckpt_state = torch.load(model_path) 
         self.model = get_model(self.args).to(self.args.device)
@@ -36,10 +33,9 @@ class InferenceDB():
         self.ap.load_data()
         self.video_assets = self.ap.get_video_assets()
 
-    def load_dataset_new(self,new_patient_list):
-        self.new_patient_list = new_patient_list
-        self.ap.load_data_autolabel(self.new_patient_list)
-        self.video_assets = self.ap.get_video_assets()
+    def load_dataset_autolabel(self):
+        self.dp.load_data()
+        self.video_assets = self.dp.get_video_assets()
     
     def find_patient_no(self, video_name):
         tokens = video_name.split('_')
@@ -152,13 +148,13 @@ class InferenceDB():
         return results
 
     @torch.no_grad()
-    def inference_new(self,new_patient_list):
+    def inference_new(self):
         import numpy as np
         import json
         print('\n\t########## INFERENCEING (DB) #########\n')
         
         # data loder
-        self.load_dataset_new(new_patient_list)
+        self.load_dataset_autolabel()
         results = {}
         results_want={}
         
@@ -285,13 +281,13 @@ class InferenceDB():
                 if "R_" in json_path:
                     json_name = json_path + "/"+ new_data_video[j] + "_TBE_30.json"
                     print("json_name", json_name)                     
-                    with open(json_name, 'w') as f:
-                        json.dump(new_json, f)
+                    # with open(json_name, 'w') as f:
+                    #     json.dump(new_json, f)
                 elif "L_" in json_path:
                     json_name = json_path + "/"+ new_data_video[j] + "_NRS_30.json"
                     print("json_name", json_name)
-                    with open(json_name, 'w') as f:
-                        json.dump(new_json, f)
+                    # with open(json_name, 'w') as f:
+                    #     json.dump(new_json, f)
 
     
     def forward(self, batch_input):
@@ -312,20 +308,3 @@ class InferenceDB():
         predict_df.to_csv(predict_csv_path)
 
 
-
-
-def new_data_inference(new_patient_list):
-    from config.base_opts import parse_opts
-    parser = parse_opts()
-    args = parser.parse_args()
-
-    # training
-    autolabel_trainer = Trainer(args)
-    autolabel_trainer.fit()
-
-    # inference + make json
-    args.restore_path =autolabel_trainer.args.save_path    
-    infer = InferenceDB(args)
-    infer.load_model()
-    infer.set_inference_interval(args.inference_interval)
-    results = infer.inference_new(new_patient_list)

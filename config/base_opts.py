@@ -112,14 +112,14 @@ def parse_opts():
 
     # -------------- Dataset --------------------
     parser.add_argument('--dataset', 
-            default='autolabel',
+            default='lapa',
             type=str, 
-            help='choose a surgery dataset [robot / lapa / autolabel]')
+            help='choose a surgery dataset [robot / lapa / ]')
     
     parser.add_argument('--datatype',
-            default='',
+            default='vihub',
             type=str,
-            help='Annotation dataset version [ mola / vihub / -]'),
+            help='Annotation dataset version [ mola / vihub / ]'),
     
 
     parser.add_argument('--data_base_path',

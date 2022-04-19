@@ -56,15 +56,6 @@ class DBHelper():
 
         return pd.read_sql_query(cmd, self.connector)
     
-    def select_no_anno(self, cond_info):
-        if cond_info is not None:
-            cond = ' WHERE ' + cond_info
-            cmd = 'SELECT * FROM {} {}'.format(self.table_name, cond)
-
-        else:
-            cmd = 'SELECT * FROM {}'.format(self.table_name)
-        return pd.read_sql_query(cmd, self.connector)
-
 
     def update(self, replace_data, cond_info):
         if cond_info is not None:

@@ -21,10 +21,6 @@ def load_data(args):
         trainset = LapaDataset(args, state='train', sample_type=args.sample_type)
         valset = LapaDataset(args, state='val', sample_type=args.sample_type)
 
-    elif args.dataset == 'autolabel':
-        trainset = SubDataset(args, state='train', sample_type=args.sample_type)
-        valset = SubDataset(args, state='val', sample_type=args.sample_type)
-    
     if args.sampler == 'oversampler':
         train_loader = DataLoader(trainset,
                                 batch_size=args.batch_size,

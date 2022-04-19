@@ -37,22 +37,14 @@ table_elements = {
 # subset config
 # 특정 조건들... (nrs ratio 등 해당 조건에 맞는 데이터를 불러오도록 하기)
 subset_condition = {
-
-    'val': [
-        # 'SURGERY == "robot"',
-        # 'SURGERY_TYPE == "G_1"',
-        # 'SURGERY_TYPE IN ("G_1", "G_3")',
-        # 'ANNOTATION_V1' == 1,
-        # 'FPS < 30',
-        'SURGERY_TYPE IN ("G_3")'
-        
-    ],
     'train': [
-        # 'FPS > 50',
         'SURGERY_TYPE IN ("G_1", "G_2")'
-
+    ],
+    'val': [
+        'SURGERY_TYPE IN ("G_3")'
     ],
     'test': [
+        'ANNOTATION_V1==0'
 
     ]
 }
