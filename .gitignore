@@ -6,4 +6,4 @@ __pycache__
 
 # .out
 **.out
-core/dataset/infer_dataset.py
+core/dataset/json_cover.py
