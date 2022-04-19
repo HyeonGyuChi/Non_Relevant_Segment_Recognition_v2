@@ -13,12 +13,27 @@ from core.util.hem import OnlineHEM
 from core.util.metric import MetricHelper
 
 
+from torch.utils.data import DataLoader
+from core.dataset import SubDataset
+import torchvision
+from torchvision.models import resnet18
+
+def pretrained_resnet50():
+        model = torchvision.models.resnet50(pretrained=True)
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, 2)
+
+        return model
+
 class Trainer():
+    
     def __init__(self, args):
         self.args = args        
         self.setup()
-        
+        # os.environ['CUDA_VISIBLE_DEVICES'] = self.args.cuda_list
+    
     def setup(self):
+        os.environ['CUDA_VISIBLE_DEVICES'] = self.args.cuda_list
         self.current_epoch = 1
         self.current_state = 'train' # base set
         
@@ -27,8 +42,11 @@ class Trainer():
         self.save_hyperparams()
     
         print('======= Load model =======')
+        # if self.args.dataset == "autolabel":
+        #     self.model = pretrained_resnet50().to(self.args.device)
+        # else:
         self.model = get_model(self.args).to(self.args.device)
-        
+
         print('======= Load loss =======')
         self.loss_fn = get_loss(self.args)
         
@@ -36,9 +54,10 @@ class Trainer():
         self.optimizer, self.scheduler = configure_optimizer(self.args, self.model)
     
         print('======= Load dataset =======')
+
         self.train_loader, self.val_loader = load_data(self.args)
-    
-        print(len(self.train_loader), len(self.val_loader))
+        print("Train Data:",len(self.train_loader), "Validation Data:",len(self.val_loader))
+
     
         print('======= Set HEM Helper =======')
         self.hem_helper = OnlineHEM(self.args)
@@ -99,7 +118,6 @@ class Trainer():
     def train(self):
         self.model.train()
         cnt = 0
-        
         for data in tqdm(self.train_loader, desc='[Train Phase] : '):
             self.optimizer.zero_grad()
             
@@ -156,7 +174,6 @@ class Trainer():
         
     def forward(self, x, y):
         outputs = self.model(x)
-        
         return self.calc_loss(outputs, y)
     
     def calc_loss(self, outputs, y):
@@ -165,8 +182,7 @@ class Trainer():
             loss = self.hem_helper.apply(emb, y_hat, y, self.model.proxies)
         else:
             y_hat = outputs
-            loss = self.loss_fn(y_hat, y)
-            
+            loss = self.loss_fn(y_hat, y) 
         return y_hat, loss
     
     def save_checkpoint(self):
@@ -233,5 +249,3 @@ class Trainer():
             print('[+] save checkpoint (Last Epoch) : ', save_path)
             
             
-
-        

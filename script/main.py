@@ -24,15 +24,15 @@ def main():
     infer.set_inference_interval(args.inference_interval)
     results = infer.inference()
     
-    # # evaluation
-    # evaluator = Evaluator(args)
-    # evaluator.set_inference_interval(args.inference_interval)
-    # evaluator.evaluation(results_dict=results)
+    # evaluation
+    evaluator = Evaluator(args)
+    evaluator.set_inference_interval(args.inference_interval)
+    evaluator.evaluation(results_dict=results)
     
-    # # visualize
-    # visual_tool = VisualTool(args)
-    # visual_tool.set_result_path('{}/inference_results'.format(args.save_path))
-    # visual_tool.visualize()
+    # visualize
+    visual_tool = VisualTool(args)
+    visual_tool.set_result_path('{}/inference_results'.format(args.save_path))
+    visual_tool.visualize()
 
 if __name__ == '__main__':
     if __package__ is None:

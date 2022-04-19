@@ -15,7 +15,8 @@ from core.util.parser import DBParser
 
 
 class SubDataset(Dataset):
-    def __init__(self, args, state='train', sample_type='boundary'):
+    # def __init__(self, args, state='train', sample_type='boundary'):
+    def __init__(self, args, state, sample_type='boundary'):
         super().__init__()
         
         self.args = args
@@ -55,7 +56,7 @@ class SubDataset(Dataset):
 
         patient_data = self.dp.get_patient_assets()
         anno_df_list = []
-        
+
         for patient, data in patient_data.items():
             anno_df = pd.DataFrame({
                 'img_path': data[0],
@@ -64,14 +65,15 @@ class SubDataset(Dataset):
 
             if self.sample_type == 'boundary':
                 # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
-                anno_df['patient'] = anno_df.img_path.str.split('/').str[6]
+                # anno_df['patient'] = anno_df.img_path.str.split('/').str[6]
+                anno_df['patient'] = patient
                 anno_df = self.bs.sample(anno_df)[['img_path', 'class_idx']] 
 
             anno_df_list.append(anno_df)
             # print(patient, '   end')
         
         refine_df = pd.concat(anno_df_list)
-        print(refine_df.head())
+        # print("refine_df.head()\n",refine_df.head())
 
         # hueristic_sampling
         if self.sample_type == 'boundary':
@@ -104,6 +106,9 @@ class SubDataset(Dataset):
         self.label_list = assets_df.class_idx.tolist()
 
         self.assets_df = assets_df
+        pd.set_option('display.max.colwidth', 90)
+        # print("SubDataset: \n",self.assets_df) 
+
     
     def number_of_rs_nrs(self):
         return self.label_list.count(0) ,self.label_list.count(1)

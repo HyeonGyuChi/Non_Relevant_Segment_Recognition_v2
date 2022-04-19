@@ -1,3 +1,4 @@
+# json 잘못 편집했을 때
 import json
 
 anno_path= "./NRS/lapa/vihub/anno/v3/04_GS4_99_L_68_01_NRS_30_new.json"

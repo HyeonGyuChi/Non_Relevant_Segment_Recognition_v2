@@ -9,6 +9,7 @@ name_to_model = {
     'ig_resnext101_32x48d': generate_timm_model, 
     'swin_large_patch4_window7_224': generate_timm_model, 
     'mobile_vit': generate_timm_model, 
+
 }
 
 

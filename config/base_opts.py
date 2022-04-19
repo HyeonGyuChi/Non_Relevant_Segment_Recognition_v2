@@ -112,14 +112,14 @@ def parse_opts():
 
     # -------------- Dataset --------------------
     parser.add_argument('--dataset', 
-            default='lapa',
+            default='autolabel',
             type=str, 
-            help='choose a surgery dataset [robot / lapa]')
+            help='choose a surgery dataset [robot / lapa / autolabel]')
     
     parser.add_argument('--datatype',
-            default='vihub',
+            default='',
             type=str,
-            help='Annotation dataset version [ mola / vihub ]'),
+            help='Annotation dataset version [ mola / vihub / -]'),
     
 
     parser.add_argument('--data_base_path',
@@ -193,6 +193,14 @@ def parse_opts():
     
     parser.add_argument('--appointment_assets_path', 
             default='', 
+            type=str,)
+
+
+    parser.add_argument('--train_state', 
+            default='train', 
+            type=str,)
+    parser.add_argument('--val_state', 
+            default='val', 
             type=str,)
     
     # -------------- Experimental Hyper-parameters (Offline) --------------------
@@ -268,7 +276,7 @@ def parse_opts():
                         help='Inference Interval of frame')
 
     parser.add_argument('--db_path',
-            default='/dataset/NRS/meta_info.db',
+            default='../core/dataset/NRS/meta_info.db',
             type=str,
             help='Data location')
         
