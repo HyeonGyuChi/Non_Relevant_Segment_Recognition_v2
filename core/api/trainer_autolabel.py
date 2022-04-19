@@ -30,7 +30,7 @@ class Trainer_autolabel():
     def setup(self):
         self.current_epoch = 1
         self.current_state = 'train' # base set
-        
+         
         # make log directory
         self.make_log_dir()
         self.save_hyperparams()
@@ -45,6 +45,8 @@ class Trainer_autolabel():
         self.optimizer, self.scheduler = configure_optimizer(self.args, self.model)
     
         print('======= Load dataset =======')
+        # self.train_loader, self.val_loader = load_data(self.args)
+
         trainset = SubDataset(self.args, state='train', sample_type=self.args.sample_type)
         valset   = SubDataset(self.args, state='val', sample_type=self.args.sample_type)
         
@@ -62,14 +64,14 @@ class Trainer_autolabel():
                                 shuffle=True,
                                 pin_memory=True,
                                 )
-        
         self.val_loader = DataLoader(valset,
                                 batch_size=self.args.batch_size,
                                 num_workers=self.args.num_workers,
                                 shuffle=False,
                                 pin_memory=True,
                                 )
-        print("Train Data:        ",len(self.train_loader), "\nValidation Data:",len(self.val_loader)) 
+        print("Train Data     :",len(self.train_loader)) 
+        print("Validation Data:",len(self.val_loader)) 
 
         print('======= Set HEM Helper =======')
         self.hem_helper = OnlineHEM(self.args)

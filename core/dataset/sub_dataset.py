@@ -27,7 +27,7 @@ class SubDataset(Dataset):
 
         self.dp = DBParser(self.args, state=self.state)
         self.load_data()
-                
+        
         # augmentation setup
         if self.args.experiment_type == 'ours':
             if self.args.model == 'mobile_vit':
