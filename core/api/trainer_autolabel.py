@@ -22,7 +22,7 @@ def pretrained_resnet50():
         model.fc = nn.Linear(num_ftrs, 2)
         return model
 
-class Trainer():
+class Trainer_autolabel():
     def __init__(self, args):
         self.args = args        
         self.setup()

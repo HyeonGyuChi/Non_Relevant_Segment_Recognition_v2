@@ -13,7 +13,7 @@ from core.util.parser import DBParser
 from core.util.misc import *
 
 
-class InferenceDB():
+class InferenceDB_autolabel():
     def __init__(self, args):
         self.args = args
         self.ap = AssetParser(self.args, state='val')
@@ -39,7 +39,6 @@ class InferenceDB():
     
     def find_patient_no(self, video_name):
         tokens = video_name.split('_')
-            
         # search patient number
         for ti, token in enumerate(tokens):
             if self.args.dataset == 'robot':
@@ -64,8 +63,6 @@ class InferenceDB():
                     patient_num = video_name.split("_")[0]+"_"+video_name.split("_")[1]+"_"+video_name.split("_")[2]+"_"+video_name.split("_")[3]+"_"+video_name.split("_")[4]
                     # print("patient_num",patient_num)
                     break
-
-        
         return patient_num
     
     @torch.no_grad()
@@ -148,7 +145,7 @@ class InferenceDB():
         return results
 
     @torch.no_grad()
-    def inference_new(self):
+    def inference_autolabel(self):
         import numpy as np
         import json
         print('\n\t########## INFERENCEING (DB) #########\n')
