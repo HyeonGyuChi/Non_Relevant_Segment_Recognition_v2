@@ -8,7 +8,7 @@ def parse_opts():
 
     # --------------- Model basic info --------------------
     parser.add_argument('--model',
-            default='mobilenetv3_large_100',
+            default='resnet18',
             type=str,
             help='Select model to train/test')
     

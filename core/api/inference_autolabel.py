@@ -54,16 +54,6 @@ class InferenceDB_autolabel():
                     # print("patient_num",patient_num)
                     break
 
-            elif self.args.dataset == 'autolabel':
-                if token == 'R':
-                    patient_num = 'R_' + tokens[ti+1]
-                    # print("patient_num",patient_num)
-                    break
-                elif token == 'L':
-                    #patient = 'L_' + tokens[ti+1]
-                    patient_num = video_name.split("_")[0]+"_"+video_name.split("_")[1]+"_"+video_name.split("_")[2]+"_"+video_name.split("_")[3]+"_"+video_name.split("_")[4]
-                    # print("patient_num",patient_num)
-                    break
         return patient_num
     
     @torch.no_grad()

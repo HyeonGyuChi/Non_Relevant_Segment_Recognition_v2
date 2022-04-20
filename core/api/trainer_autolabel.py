@@ -13,15 +13,6 @@ from core.util.metric import MetricHelper
 from torch.utils.data import DataLoader
 from core.dataset import SubDataset
 
-import torchvision
-from torchvision.models import resnet18
-
-def pretrained_resnet50():
-        model = torchvision.models.resnet50(pretrained=True)
-        num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, 2)
-        return model
-
 class Trainer_autolabel():
     def __init__(self, args):
         self.args = args        
