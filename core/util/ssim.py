@@ -5,7 +5,7 @@ import imutils
 import datetime
 
 from skimage.metrics import structural_similarity as ssim
-from core.util.parser import AssetParser
+# from core.util.parser import AssetParser
 
 
 
@@ -22,6 +22,7 @@ class SSIM():
                 self.patients_list = mola[state][self.args.fold]
         elif self.args.dataset == 'lapa':
             pass
+           
         
         self.img_base_path = self.args.data_base_path + '/{}/{}/img'.format(self.args.dataset,
                                                                                 self.args.datatype)
@@ -109,6 +110,12 @@ class SSIM():
         return converted_time
 
 
+
+
+
+
+
+
 def get_anno_list(target_anno, total_len, time_th):
     # select target annotation list (30초 이상 & nrs 인 경우)
     gt_chunk_list = [] # [[1, 100], [59723, 61008], [67650, 72319]]
@@ -176,6 +183,9 @@ def fps_tuning(target_assets_df, target_fps, VIDEO_FPS):
 
 
 
+
+
+
 def main(target_frame_base_path, target_anno_base_path, time_th, ssim_score_th):
     # pd.set_option('display.max_rows', None)
     n_cpu = 60
@@ -184,7 +194,7 @@ def main(target_frame_base_path, target_anno_base_path, time_th, ssim_score_th):
 
     target_anno_list = glob.glob(os.path.join(target_anno_base_path, '*.json'))
     target_anno_list = natsort.natsorted(target_anno_list)
-
+ 
     patients_dict = defaultdict(list)
     for target_anno in target_anno_list:
         patients_dict['_'.join(target_anno.split('/')[-1].split('_')[:5])].append(target_anno)
@@ -198,7 +208,8 @@ def main(target_frame_base_path, target_anno_base_path, time_th, ssim_score_th):
 
         per_patient_list = []
 
-        for target_anno in patient: # ['/data3/Public/NRS_Recog/annotation/Gastrectomy/Lapa/v3/gangbuksamsung_127case/NRS/04_GS4_99_L_1_01_NRS_30.json', '/data3/Public/NRS_Recog/annotation/Gastrectomy/Lapa/v3/gangbuksamsung_127case/NRS/04_GS4_99_L_1_02_NRS_30.json']
+        for target_anno in patient: 
+            # ['/data3/Public/NRS_Recog/annotation/Gastrectomy/Lapa/v3/gangbuksamsung_127case/NRS/04_GS4_99_L_1_01_NRS_30.json', '/data3/Public/NRS_Recog/annotation/Gastrectomy/Lapa/v3/gangbuksamsung_127case/NRS/04_GS4_99_L_1_02_NRS_30.json']
             '''
             target_anno = '/data3/Public/NRS_Recog/annotation/Gastrectomy/Lapa/v3/gangbuksamsung_127case/NRS/04_GS4_99_L_1_02_NRS_30.json'
             target_frames = '/raid/img_db/VIHUB/gangbuksamsung_127case/L_1/04_GS4_99_L_1_02'

@@ -102,6 +102,7 @@ class DBParser():
         # offline setup
         if 'mini' in self.args.train_stage:
             self.set_mini_fold()
+            
         self.load_from_json(asset_df)
 
         

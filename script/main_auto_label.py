@@ -29,6 +29,7 @@ def main():
     infer.set_inference_interval(args.inference_interval)
     results = infer.inference_autolabel()
 
+
     #### DB UPDATE
     db_helper.update(
         [['ANNOTATION_V1', 1],],

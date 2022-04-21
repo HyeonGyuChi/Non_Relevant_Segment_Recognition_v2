@@ -11,6 +11,7 @@ from core.util.parser import AssetParser
 from core.util.parser import DBParser
 # from core.util.sampler import IntervalSampler
 from core.util.misc import *
+from core.util.anno2json import Anno2Json
 
 
 class InferenceDB_autolabel():
@@ -152,8 +153,8 @@ class InferenceDB_autolabel():
             results_want[patient_n]={}
             
             for video_name in patient_data.keys():
-                patient = self.find_patient_no(video_name)
-                each_patients_save_dir = self.args.save_path + '/inference_results/{}'.format(patient)
+                # patient = self.find_patient_no(video_name)
+                each_patients_save_dir = self.args.save_path + '/inference_results/{}'.format(patient_n)
                 
                 data = patient_data[video_name]
                 
@@ -215,69 +216,9 @@ class InferenceDB_autolabel():
                 results_target_img_list = results[patient_n][video_name]["target_img"].tolist()
                 results_predict_list = results[patient_n][video_name]["predict"].tolist()
                 results[patient_n][video_name]=[results_target_img_list,results_predict_list]
-
-
-        # make json
-        new_data_patient = list(results.keys())
-        for i in range(len(new_data_patient)):
-            new_data_video = list(results.get(new_data_patient[i]))
-            for j in range(len(new_data_video)):
-                new_data_video_value=(results.get(new_data_patient[i]).get(new_data_video[j]))
-                new_data_totalframe=len(new_data_video_value[0])
-                surgery = new_data_video_value[0][0].split("/")[5]
-                surgery_type = new_data_video_value[0][0].split("/")[6]
-                new_data_label=new_data_video_value[1]
-
-                new_data_anno=[]
-                idx_list_nrs=[]
-                for k in range(len(new_data_label)):
-                    if new_data_label[k]==1:
-                        idx_list_nrs.append(k)
-                idx_list_nrs_copy = idx_list_nrs.copy()
-
-                for k in range(len(idx_list_nrs)-2):
-                    if idx_list_nrs[k]+1==idx_list_nrs[k+1]:
-                        if idx_list_nrs[k+1]+1 < idx_list_nrs[k+2]:
-                            pass
-                        else:
-                            idx_list_nrs_copy.remove(idx_list_nrs[k+1])
-                
-                for k in range(0,len(idx_list_nrs_copy)-1,2):
-                    new_data_start_end = {"start": idx_list_nrs_copy[k],"end": idx_list_nrs_copy[k+1], "code":1}
-                    new_data_anno.append(new_data_start_end)
-
-                new_json = {
-                "totalFrame": new_data_totalframe,
-                "frameRate": 30,
-                "width": 1920,
-                "height": 1080,
-                "_id": "61afe4e12bd5d3001b3578dc",
-                "annotations": new_data_anno,
-                "annotationType": "NRS",
-                "createdAt":"",              #2021-12-07T22:49:05.723Z",
-                "updatedAt": "", #2021-01-02 22:41:10.181418
-                "annotator": "30",
-                "name": new_data_video[j],
-                "label": {"1": "NonRelevantSurgery"}
-                }
-
-
-                json_path="../core/dataset/NRS/toyset/"+surgery+"/"+ surgery_type +"/"+new_data_patient[i]+"/"+new_data_video[j]+"/anno/v1"
-                if os.path.exists(json_path):
-                    pass
-                else:
-                    os.mkdir(json_path)
-
-                if "R_" in json_path:
-                    json_name = json_path + "/"+ new_data_video[j] + "_TBE_30.json"
-                    print("json_name", json_name)                     
-                    with open(json_name, 'w') as f:
-                        json.dump(new_json, f)
-                elif "L_" in json_path:
-                    json_name = json_path + "/"+ new_data_video[j] + "_NRS_30.json"
-                    print("json_name", json_name)
-                    with open(json_name, 'w') as f:
-                        json.dump(new_json, f)
+        
+        annotation_to_json = Anno2Json(self.args,results,self.video_assets)
+        annotation_to_json.make_json(version="autolabel")
 
     
     def forward(self, batch_input):
