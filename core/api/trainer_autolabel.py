@@ -5,30 +5,30 @@ from glob import glob
 import natsort
 import torch
 import torch.nn as nn
-
 from core.model import get_model, get_loss, configure_optimizer
 from core.dataset import load_data
 # from core.util.hem import HEMHelper, OnlineHEM
 from core.util.hem import OnlineHEM
 from core.util.metric import MetricHelper
+from torch.utils.data import DataLoader
+from core.dataset import SubDataset
 
-
-class Trainer():
+class Trainer_autolabel():
     def __init__(self, args):
         self.args = args        
         self.setup()
-        
+    
     def setup(self):
         self.current_epoch = 1
         self.current_state = 'train' # base set
-        
+         
         # make log directory
         self.make_log_dir()
         self.save_hyperparams()
     
         print('======= Load model =======')
         self.model = get_model(self.args).to(self.args.device)
-        
+
         print('======= Load loss =======')
         self.loss_fn = get_loss(self.args)
         
@@ -36,10 +36,34 @@ class Trainer():
         self.optimizer, self.scheduler = configure_optimizer(self.args, self.model)
     
         print('======= Load dataset =======')
-        self.train_loader, self.val_loader = load_data(self.args)
-    
-        print(len(self.train_loader), len(self.val_loader))
-    
+        # self.train_loader, self.val_loader = load_data(self.args)
+
+        trainset = SubDataset(self.args, state='train', sample_type=self.args.sample_type)
+        valset   = SubDataset(self.args, state='val', sample_type=self.args.sample_type)
+        
+        if self.args.sampler == 'oversampler':
+            self.train_loader = DataLoader(trainset,
+                                    batch_size=self.args.batch_size,
+                                    num_workers=self.args.num_workers,
+                                    sampler=OverSampler(trainset.label_list, self.args.batch_size//2, self.args.batch_size),
+                                    pin_memory=True,
+                                    )
+        else:
+            self.train_loader = DataLoader(trainset,
+                                batch_size=self.args.batch_size,
+                                num_workers=self.args.num_workers,
+                                shuffle=True,
+                                pin_memory=True,
+                                )
+        self.val_loader = DataLoader(valset,
+                                batch_size=self.args.batch_size,
+                                num_workers=self.args.num_workers,
+                                shuffle=False,
+                                pin_memory=True,
+                                )
+        print("Train Data     :",len(self.train_loader)) 
+        print("Validation Data:",len(self.val_loader)) 
+
         print('======= Set HEM Helper =======')
         self.hem_helper = OnlineHEM(self.args)
     
@@ -99,7 +123,6 @@ class Trainer():
     def train(self):
         self.model.train()
         cnt = 0
-        
         for data in tqdm(self.train_loader, desc='[Train Phase] : '):
             self.optimizer.zero_grad()
             
@@ -156,7 +179,6 @@ class Trainer():
         
     def forward(self, x, y):
         outputs = self.model(x)
-        
         return self.calc_loss(outputs, y)
     
     def calc_loss(self, outputs, y):
@@ -165,8 +187,7 @@ class Trainer():
             loss = self.hem_helper.apply(emb, y_hat, y, self.model.proxies)
         else:
             y_hat = outputs
-            loss = self.loss_fn(y_hat, y)
-            
+            loss = self.loss_fn(y_hat, y) 
         return y_hat, loss
     
     def save_checkpoint(self):
@@ -233,5 +254,3 @@ class Trainer():
             print('[+] save checkpoint (Last Epoch) : ', save_path)
             
             
-
-        

@@ -8,7 +8,7 @@ def parse_opts():
 
     # --------------- Model basic info --------------------
     parser.add_argument('--model',
-            default='mobilenetv3_large_100',
+            default='resnet18',
             type=str,
             help='Select model to train/test')
     
@@ -114,12 +114,12 @@ def parse_opts():
     parser.add_argument('--dataset', 
             default='lapa',
             type=str, 
-            help='choose a surgery dataset [robot / lapa]')
+            help='choose a surgery dataset [robot / lapa / ]')
     
     parser.add_argument('--datatype',
             default='vihub',
             type=str,
-            help='Annotation dataset version [ mola / vihub ]'),
+            help='Annotation dataset version [ mola / vihub / ]'),
     
 
     parser.add_argument('--data_base_path',
@@ -268,7 +268,7 @@ def parse_opts():
                         help='Inference Interval of frame')
 
     parser.add_argument('--db_path',
-            default='/dataset/NRS/meta_info.db',
+            default='../core/dataset/NRS/meta_info.db',
             type=str,
             help='Data location')
         

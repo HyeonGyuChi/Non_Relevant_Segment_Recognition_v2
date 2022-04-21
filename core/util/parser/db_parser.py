@@ -13,7 +13,8 @@ from config.meta_db_config import subset_condition
 
 
 class DBParser():
-    def __init__(self, args, state='train'):
+    # def __init__(self, args, state='train'):
+    def __init__(self, args, state):
         self.args = args
         self.state = state
         self.data_dict = {}
@@ -101,12 +102,13 @@ class DBParser():
         # offline setup
         if 'mini' in self.args.train_stage:
             self.set_mini_fold()
-
+            
         self.load_from_json(asset_df)
+
         
     def load_from_json(self, asset_df):
         for data in asset_df.values:
-            # load frame list
+            # load frame list;..
             patient = data[2]
 
             if patient not in self.patient_list:
@@ -132,10 +134,14 @@ class DBParser():
                 # make annotations
                 anno_base_path = patient_path + f'/{video_name}/anno/org'
 
-                if data[-1] == True and os.path.exists(anno_base_path):
+                # print("data[-1] ",data[-1] )
+                # if data[-1] == True and os.path.exists(anno_base_path):
+                if os.path.exists(anno_base_path):
                     anno_path = glob(anno_base_path + '/*.json')
 
-                    # load annotation
+
+                    # load annotationsubset_condition
+
                     with open(anno_path[0], 'r') as f:
                         anno_data = json.load(f)
 

@@ -27,7 +27,6 @@ class AssetParser():
             self.set_asset_info(state=self.state)
                    
     def set_asset_info(self, state='train'):
-        # print("self.args.dataset:", self.args.dataset)
         if self.args.dataset == 'robot':
             if self.args.datatype == 'vihub':
                 pass
@@ -46,10 +45,6 @@ class AssetParser():
                                                                             self.args.datatype,
                                                                             self.args.data_version)
 
-        # print("self.args.datatype",self.args.datatype)
-        # print("self.img_base_path",self.img_base_path)
-        # print("self.anno_path",self.anno_path)
-            
     def set_mini_fold(self):
         f_len = len(self.patients_list)
         N = self.args.n_mini_fold
@@ -82,12 +77,8 @@ class AssetParser():
             
     def get_patient_assets(self):
         patient_dict = {}
-        # print("get_patient_assets data_dicet.: ",self.data_dict)
-        # print("get_patient_assets data_dicet.keys(): ",self.data_dict.keys())
         for patient in self.data_dict.keys():
             p_dict = self.data_dict[patient]
-            # print(patient,"p_dict" ,p_dict)
-            # print(patient,"p_dict.keys" ,p_dict.keys())
             
             img_list, label_list = list(), list()
             anno_list=[]
@@ -95,23 +86,14 @@ class AssetParser():
                 img_list += list(p_dict[vd]['img'])
                 
                 if 'anno' in p_dict[vd]:
-                    # print("type(label_list)",type(label_list))
                     try:
                         label_list += list(p_dict[vd]['anno'])
-                        # print("try", type(label_list))
                     except:
-                        # anno_list.append(p_dict[vd]['anno'])
-                        # label_list=anno_list
                         label_list=p_dict[vd]['anno']
-                        # print("except", type(label_list))
-
-                    # print("label_list",label_list)
-                    # print("label_list len",len(label_list))
 
                 else:
                     label_list = None
 
-            # print("label_list",label_list)
             if label_list is not None and len(label_list) != len(img_list):
                 img_list = img_list[:len(label_list)]
             
@@ -149,6 +131,7 @@ class AssetParser():
         else:
             self.load_img_path_list()
             self.make_anno()
+
         
     def load_data_from_path(self):
         appointment_assets_df = pd.read_csv(self.args.appointment_assets_path)
@@ -229,21 +212,16 @@ class AssetParser():
                         video_name: {'img': file_list}
                     }
 
+
     def make_anno(self):
-        # print("make_anno")
         anno_list = natsort.natsorted(glob(self.anno_path + '/*.json'))
         
         for anno_path in tqdm(anno_list):
             anno_fname = anno_path.split('/')[-1][:-5]
-            # print("anno_path",anno_path)
-            # print("anno_fname",anno_fname)
             tokens = anno_fname.split('_')
-            # print("tokens",tokens)
             
             # search patient number
             for ti, token in enumerate(tokens):
-                # print("ti",ti)
-                # print("token",token)
                 if self.args.dataset == 'robot':
                     if token == 'R':
                         patient = 'R_' + tokens[ti+1]
@@ -254,13 +232,10 @@ class AssetParser():
                         patient = anno_fname.split("_")[0]+"_"+anno_fname.split("_")[1]+"_"+anno_fname.split("_")[2]+"_"+anno_fname.split("_")[3]+"_"+anno_fname.split("_")[4]
                         break
 
-            # print("make_anno_patient",patient)
-            # print("make_anno_data_dict",self.data_dict)
-            
+
 
             if self.args.dataset == 'robot':
                 if patient in self.data_dict:
-                    # print(self.args.dataset, "patient in self.data_dict")
                     # load annotation
                     with open(anno_path, 'r') as f:
                         data = json.load(f)
@@ -271,7 +246,6 @@ class AssetParser():
                     for anno in data['annotations']:
                         st, ed = anno['start'], anno['end']
                         labels[st:ed+1] = 1
-                        # print("label",label)
                         
                     # quantization
                     labels = labels[::self.args.sample_ratio].astype('uint8')
@@ -281,11 +255,8 @@ class AssetParser():
                             self.data_dict[patient][video_name]['anno'] = labels
 
             elif self.args.dataset == 'lapa':
-                # print("patient",patient)
-                #print("self.data_dict.keys()",self.data_dict.keys())
                 
                 if patient in self.data_dict.keys():
-                    # print("patient in self.data_dict")
                     try:
                         with open(anno_path, 'r') as f:
                             data = json.load(f)
@@ -296,7 +267,6 @@ class AssetParser():
                         for anno in data['annotations']:
                             st, ed = anno['start'], anno['end']
                             labels[st:ed+1] = 1
-                            # print("label",label)
                             
                         # quantization
                         labels = labels[::self.args.sample_ratio].astype('uint8')
@@ -307,7 +277,6 @@ class AssetParser():
                     except:
                         with open(anno_path) as f: 
                             data = ""
-                            # print("anno_path json",anno_path)
                             for line in f:            
                                 data+=line
                             with open(anno_path, 'w') as f:
@@ -321,14 +290,12 @@ class AssetParser():
                         for anno in data['annotations']:
                             st, ed = anno['start'], anno['end']
                             labels[st:ed+1] = 1
-                            # print("label",label)
-                            
+
                         # quantization
                         labels = labels[::self.args.sample_ratio].astype('uint8')
             
                         for video_name in self.data_dict[patient].keys():
                             if video_name in anno_fname:
                                 self.data_dict[patient][video_name]['anno'] = labels
-                # else:
-                #     print("NOOOOO")
+
 

@@ -58,7 +58,7 @@ class RobotDataset(Dataset):
         
         patient_data = self.ap.get_patient_assets()
         anno_df_list = []
-        print("load_data_patient_data..items()",patient_data.items())
+        # print("load_data_patient_data..items()",patient_data.items())
         for patient, data in patient_data.items():
             anno_df = pd.DataFrame({
                 'img_path': data[0],
@@ -74,7 +74,7 @@ class RobotDataset(Dataset):
             # print(patient, '   end')
         
         refine_df = pd.concat(anno_df_list)
-        print(refine_df.head())
+        # print(refine_df.head())
 
         # hueristic_sampling
         if self.sample_type == 'boundary':
@@ -107,6 +107,7 @@ class RobotDataset(Dataset):
         self.label_list = assets_df.class_idx.tolist()
 
         self.assets_df = assets_df
+        # print("train_self.assets_df",self.assets_df)
     
     def number_of_rs_nrs(self):
         return self.label_list.count(0) ,self.label_list.count(1)

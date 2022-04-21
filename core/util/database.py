@@ -43,7 +43,6 @@ class DBHelper():
     def select(self, cond_info):
         if cond_info is not None:
             cond = ' WHERE '
-
             for idx, _info in enumerate(cond_info):
                 cond += '{}'.format(_info)
 
@@ -51,16 +50,17 @@ class DBHelper():
                     cond += ' AND '
 
             cmd = 'SELECT * FROM {} {}'.format(self.table_name, cond)
+
         else:
             cmd = 'SELECT * FROM {}'.format(self.table_name)
 
         return pd.read_sql_query(cmd, self.connector)
+    
 
     def update(self, replace_data, cond_info):
         if cond_info is not None:
             cond = 'WHERE '
             req = ''
-
             for idx, _info in enumerate(cond_info):
                 cond += '{}'.format(_info)
 
@@ -79,6 +79,7 @@ class DBHelper():
 
         self.cursor.execute(cmd)
         self.connector.commit()
+
 
     def update_table_elements(self):
         pass
@@ -121,7 +122,8 @@ class DBHelper():
         import random
         import numpy as np
 
-        base_path = '/dataset/NRS/toyset'
+        #jw path ̰
+        base_path = '../core/dataset/NRS/toyset'
 
         for s in os.listdir(base_path): # source?
             dpath = base_path + f'/{s}'

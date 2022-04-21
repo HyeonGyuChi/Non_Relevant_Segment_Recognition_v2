@@ -6,6 +6,8 @@ def main():
     from core.util.database import DBHelper
     from config.meta_db_config import subset_condition
     from core.dataset import SubDataset
+    import warnings
+    warnings.filterwarnings("ignore")
 
     parser = parse_opts()
     args = parser.parse_args()
@@ -14,9 +16,9 @@ def main():
     db_helper.remove_table()
     db_helper.make_table()
     db_helper.random_attr_generation()
-    df = db_helper.select(cond_info=None)
     
-    # print(df)
+    df = db_helper.select(cond_info=None)
+    print("df\n",df)
 
     db_helper.update(
         [['ANNOTATION_V3', 1],],
