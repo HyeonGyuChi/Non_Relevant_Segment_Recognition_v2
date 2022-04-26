@@ -37,7 +37,6 @@ def main(target_frame_base_path, target_anno_base_path, time_th, ssim_score_th):
     args = parser.parse_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda_list
 
-    # n_cpu = os.cpu_count()
     n_cpu = 60
 
     ray.init(num_cpus=n_cpu)
