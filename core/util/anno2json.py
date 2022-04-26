@@ -7,10 +7,10 @@ from core.util.database import DBHelper
 from config.meta_db_config import subset_condition
 
 class Anno2Json():
-    def __init__(self, args,results,target_anno):
+    def __init__(self, args,results,json_path):
         self.args = args
         self.results = results
-        self.target_anno = target_anno
+        self.json_path = json_path
         self.dp = DBParser(self.args, state='test')
         self.db_helper = DBHelper(args)
 
@@ -94,7 +94,7 @@ class Anno2Json():
                 new_data_start_end = {"start": index_list_copy[i],"end": index_list_copy[i+1], "code":2}
                 new_data_anno.append(new_data_start_end)
 
-            json_path = self.target_anno
+            json_path = self.json_path
             with open(json_path, 'r') as f:
                 json_data = json.load(f)
                 total_json = json_data['annotations'] + new_data_anno
