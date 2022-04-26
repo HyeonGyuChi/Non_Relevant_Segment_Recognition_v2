@@ -8,6 +8,10 @@ RUN apt-get install -y ffmpeg
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y --no-install-recommends python-opencv
 
+RUN apt-get -y update
+RUN apt-get install -y build-essential curl unzip psmisc
+
+
  # for setup time zone
 RUN apt-get install -y tzdata
 ENV TZ=Asia/Seoul

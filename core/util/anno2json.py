@@ -1,15 +1,16 @@
 import os
 import json
 import natsort
+import pandas as pd
 from core.util.parser import DBParser
 from core.util.database import DBHelper
 from config.meta_db_config import subset_condition
 
 class Anno2Json():
-    def __init__(self, args,results,video_assets):
+    def __init__(self, args,results,target_anno):
         self.args = args
         self.results = results
-        self.video_assets = video_assets
+        self.target_anno = target_anno
         self.dp = DBParser(self.args, state='test')
         self.db_helper = DBHelper(args)
 
@@ -73,4 +74,37 @@ class Anno2Json():
                             json.dump(new_json, f)
 
         elif version == "ssim":
-            pass
+            # NRS 이미지만 ssim 계산 후 annotation
+            index_list = []
+            for data in self.results.values:
+                ssim = data[5]
+                index = data[0]
+                if ssim > 0.997:
+                    index_list.append(index)
+
+            index_list_copy = index_list.copy()
+            new_data_anno=[]
+            for i in range(len(index_list)-2):
+                if index_list[i]+1==index_list[i+1]:
+                    if index_list[i+1]+1 < index_list[i+2]:
+                        pass
+                    else:
+                        index_list_copy.remove(index_list[i+1])
+            for i in range(0,len(index_list_copy)-1,2):
+                new_data_start_end = {"start": index_list_copy[i],"end": index_list_copy[i+1], "code":2}
+                new_data_anno.append(new_data_start_end)
+
+            json_path = self.target_anno
+            with open(json_path, 'r') as f:
+                json_data = json.load(f)
+                total_json = json_data['annotations'] + new_data_anno
+                total_json.sort(key = lambda item : item['start'])
+                json_data['annotations']=total_json
+            
+            with open(json_path, 'w') as f:
+                json.dump(json_data, f,indent="\t")
+
+
+
+
+
