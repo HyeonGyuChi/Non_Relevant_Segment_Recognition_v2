@@ -66,12 +66,12 @@ class Anno2Json():
                         json_name = anno_base_path + "/"+ video_name + "_TBE_30.json"
                         print("json_name", json_name)                     
                         with open(json_name, 'w') as f:
-                            json.dump(new_json, f)
+                            json.dump(new_json, f,indent="\t")
                     elif "L_" in anno_base_path:
                         json_name = anno_base_path + "/"+ video_name + "_NRS_30.json"
                         print("json_name", json_name)
                         with open(json_name, 'w') as f:
-                            json.dump(new_json, f)
+                            json.dump(new_json, f,indent="\t")
 
         elif version == "ssim":
             # NRS 이미지만 ssim 계산 후 annotation
@@ -94,15 +94,61 @@ class Anno2Json():
                 new_data_start_end = {"start": index_list_copy[i],"end": index_list_copy[i+1], "code":2}
                 new_data_anno.append(new_data_start_end)
 
-            json_path = self.json_path
-            with open(json_path, 'r') as f:
+            json_name = self.json_path
+            with open(json_name, 'r') as f:
                 json_data = json.load(f)
                 total_json = json_data['annotations'] + new_data_anno
                 total_json.sort(key = lambda item : item['start'])
                 json_data['annotations']=total_json
             
-            with open(json_path, 'w') as f:
+            with open(json_name, 'w') as f:
                 json.dump(json_data, f,indent="\t")
+            
+
+    def check_json_db_update(self,version):
+        from config.base_opts import parse_opts
+        parser = parse_opts()
+        args = parser.parse_args()
+
+        db_helper = DBHelper(args)
+        BEFORE_df = db_helper.select(cond_info=None)
+        # print(BEFORE_df)
+
+        patient_list=[]
+        for i in range(len(BEFORE_df["PATIENT"])):
+            patient = BEFORE_df["SURGERY"][i]+"/"+BEFORE_df["SURGERY_TYPE"][i]+"/"+BEFORE_df["PATIENT"][i]
+            patient_list.append(patient)
+
+
+        base_path = "../core/dataset/NRS/toyset/"
+        for i in range(len(patient_list)):
+            patient = patient_list[i].split("/")[-1]
+            patient_path = base_path + patient_list[i]
+            for j in range(len(os.listdir(patient_path))):
+                anno_path = patient_path + "/" +os.listdir(patient_path)[j] + "/anno"
+                anno_list = os.listdir(anno_path)
+
+                if "v1" == version:
+                    self.db_helper.update(
+                        [['ANNOTATION_V1', 1],],
+                        ["PATIENT==patient"],
+                    )
+                    AFTER_df = self.db_helper.select(cond_info=None)
+                    print(AFTER_df)
+
+                elif "v2" == version:
+                    pass
+
+                elif "v3" == version:
+                    self.db_helper.update(
+                        [['ANNOTATION_V3', 1],],
+                        ["PATIENT==patient"],
+                    )
+                    AFTER_df = self.db_helper.select(cond_info=None)
+                    print(AFTER_df)
+       
+
+
 
 
 

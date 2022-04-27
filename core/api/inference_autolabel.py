@@ -219,6 +219,8 @@ class InferenceDB_autolabel():
         
         annotation_to_json = Anno2Json(self.args,results,None)
         annotation_to_json.make_json(version="autolabel")
+        # annotation_to_json.check_json_db_update(version="v1")
+
 
     
     def forward(self, batch_input):
