@@ -12,6 +12,8 @@ from skimage.metrics import structural_similarity as ssim
 # from core.util.parser import AssetParser
 
 def ssim_per_patient(full_patient_list):
+    import shutil
+    from core.util.anno2json import Anno2Json
     import warnings
     warnings.filterwarnings("ignore")
 
@@ -42,7 +44,6 @@ def ssim_per_patient(full_patient_list):
             else:
                 os.mkdir(target_anno_path)
                 target_anno = target_anno_path + os.listdir(video+"/anno/v1")[0]
-                import shutil
                 shutil.copy(ori_anno,target_anno)
             print('+[target anno]  : {}'.format(target_anno))
 
@@ -99,10 +100,9 @@ def ssim_per_patient(full_patient_list):
             
             print('\n\n\t\t<< JSON 수정 >>')
             print(target_anno)
-            from core.util.anno2json import Anno2Json
-            annotation_to_json = Anno2Json(args,final_df_1_fps,target_anno)
+            annotation_to_json = Anno2Json(args)
+            annotation_to_json.set_info(final_df_1_fps,target_anno)
             annotation_to_json.make_json(version="ssim")
-
     annotation_to_json.check_json_db_update(version="v3")
     print()
     print()

@@ -7,12 +7,14 @@ from core.util.database import DBHelper
 from config.meta_db_config import subset_condition
 
 class Anno2Json():
-    def __init__(self, args,results,json_path):
+    def __init__(self, args):
         self.args = args
-        self.results = results
-        self.json_path = json_path
         self.dp = DBParser(self.args, state='test')
         self.db_helper = DBHelper(args)
+
+    def set_info(self,results,json_path):
+        self.results = results
+        self.json_path = json_path
 
     def make_json(self,version):
         if version == "autolabel":
@@ -129,23 +131,31 @@ class Anno2Json():
                 anno_list = os.listdir(anno_path)
 
                 if "v1" == version:
-                    self.db_helper.update(
-                        [['ANNOTATION_V1', 1],],
-                        ["PATIENT==patient"],
-                    )
-                    AFTER_df = self.db_helper.select(cond_info=None)
-                    print(AFTER_df)
+                    json_path = os.listdir(anno_path + "/v1")
+                    if json_path == None:
+                        print("ssim labeling: PROBLEM")
+                    else:
+                        self.db_helper.update(
+                            [['ANNOTATION_V1', 1],],
+                            ["PATIENT==patient"],
+                        )
+                        AFTER_df = self.db_helper.select(cond_info=None)
+                        print(AFTER_df)
 
                 elif "v2" == version:
                     pass
 
                 elif "v3" == version:
-                    self.db_helper.update(
-                        [['ANNOTATION_V3', 1],],
-                        ["PATIENT==patient"],
-                    )
-                    AFTER_df = self.db_helper.select(cond_info=None)
-                    print(AFTER_df)
+                    json_path = os.listdir(anno_path + "/v3")
+                    if json_path == None:
+                        print("ssim labeling: PROBLEM")
+                    else:
+                        self.db_helper.update(
+                            [['ANNOTATION_V3', 1],],
+                            ["PATIENT==patient"],
+                        )
+                        AFTER_df = self.db_helper.select(cond_info=None)
+                        print(AFTER_df)
        
 
 
