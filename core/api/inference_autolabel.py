@@ -217,7 +217,8 @@ class InferenceDB_autolabel():
                 results_predict_list = results[patient_n][video_name]["predict"].tolist()
                 results[patient_n][video_name]=[results_target_img_list,results_predict_list]
         
-        annotation_to_json = Anno2Json(self.args,results,None)
+        annotation_to_json = Anno2Json(self.args)
+        annotation_to_json.set_info(results,None)
         annotation_to_json.make_json(version="autolabel")
         # annotation_to_json.check_json_db_update(version="v1")
 

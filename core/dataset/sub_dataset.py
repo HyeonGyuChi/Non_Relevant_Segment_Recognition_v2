@@ -152,15 +152,8 @@ class SubDataset(Dataset):
         
         base_path = "../core/dataset/NRS/toyset/"
         for i in range(len(self.assets_df)):
-            full_patient_list.append(base_path+ "/".join(self.assets_df["img_path"].values[i].split("/")[5:8]))
-            # patient_list.append(self.assets_df["img_path"].values[i].split("/")[7])
-            # video_list.append(self.assets_df["img_path"].values[i].split("/")[8])
-            # json_list.append("/".join(self.assets_df["img_path"].values[i].split("/")[:-2])+"/anno/v1")
-        
+            full_patient_list.append(base_path+ "/".join(self.assets_df["img_path"].values[i].split("/")[5:8]))      
         full_patient_list=list(set(full_patient_list))
-        # patient_list=list(set(patient_list))
-        # video_list=list(set(video_list))
-        # json_list=list(set(json_list))
 
 
         return full_patient_list
