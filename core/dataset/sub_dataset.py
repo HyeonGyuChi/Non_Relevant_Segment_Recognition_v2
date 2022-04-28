@@ -39,6 +39,7 @@ class SubDataset(Dataset):
         
         self.aug = d_transforms[self.state]
         
+
     def __len__(self):
         return len(self.img_list)
 
@@ -53,8 +54,8 @@ class SubDataset(Dataset):
     
     def load_data(self):
         self.dp.load_data()
-
         patient_data = self.dp.get_patient_assets()
+
         anno_df_list = []
 
         for patient, data in patient_data.items():
@@ -106,7 +107,7 @@ class SubDataset(Dataset):
         self.label_list = assets_df.class_idx.tolist()
 
         self.assets_df = assets_df
-        pd.set_option('display.max.colwidth', 90)
+        # pd.set_option('display.max.colwidth', 90)
         # print("SubDataset: \n",self.assets_df) 
 
     
@@ -141,3 +142,25 @@ class SubDataset(Dataset):
             )
 
         return patient_per_dic
+
+    def get_patient_list(self):
+        print("SubDataset: \n",self.assets_df) 
+        full_patient_list=[]
+        patient_list=[]
+        video_list=[]
+        json_list = []
+        
+        base_path = "../core/dataset/NRS/toyset/"
+        for i in range(len(self.assets_df)):
+            full_patient_list.append(base_path+ "/".join(self.assets_df["img_path"].values[i].split("/")[5:8]))
+            # patient_list.append(self.assets_df["img_path"].values[i].split("/")[7])
+            # video_list.append(self.assets_df["img_path"].values[i].split("/")[8])
+            # json_list.append("/".join(self.assets_df["img_path"].values[i].split("/")[:-2])+"/anno/v1")
+        
+        full_patient_list=list(set(full_patient_list))
+        # patient_list=list(set(patient_list))
+        # video_list=list(set(video_list))
+        # json_list=list(set(json_list))
+
+
+        return full_patient_list

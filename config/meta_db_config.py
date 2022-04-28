@@ -45,6 +45,9 @@ subset_condition = {
     ],
     'test': [
         'ANNOTATION_V1==0'
+    ],
+    'ssim': [
+        'SURGEON=="S1"'
+    ],
 
-    ]
 }
