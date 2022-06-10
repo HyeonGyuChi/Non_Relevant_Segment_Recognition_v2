@@ -5,6 +5,6 @@ logs*
 __pycache__
 
 # .out
-**.out
 script/check.py
 script/extraction_check.py
+**.out
