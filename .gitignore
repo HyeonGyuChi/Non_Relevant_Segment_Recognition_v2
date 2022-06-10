@@ -6,3 +6,5 @@ __pycache__
 
 # .out
 **.out
+script/check.py
+script/extraction_check.py
