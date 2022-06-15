@@ -23,7 +23,7 @@ def parse_opts():
             help='Select loss_fn to train/test')
     
     parser.add_argument('--batch_size',
-            default=2,
+            default=256,
             type=int,
             help='Training/Testing batch size')
     
@@ -38,12 +38,12 @@ def parse_opts():
             help='What device to use for training or validation model')
 
     parser.add_argument('--max_epoch',
-            default=30,
+            default=1,
             type=int,
             help='Maximum training epoch')
 
     parser.add_argument('--num_gpus',
-            default=1,
+            default=4,
             type=int,
             help='How many GPUs to use for training')
 
@@ -54,7 +54,7 @@ def parse_opts():
             help='What device to use for training or validation model')
 
     parser.add_argument('--cuda_list',
-            default='7',
+            default='0,1,2,3',
             type=str,
             help='Name list of gpus that are used to train')
 
@@ -112,7 +112,7 @@ def parse_opts():
 
     # -------------- Dataset --------------------
     parser.add_argument('--dataset', 
-            default='lapa',
+            default='robot',
             type=str, 
             help='choose a surgery dataset [robot / lapa]')
     
@@ -123,7 +123,7 @@ def parse_opts():
     
 
     parser.add_argument('--data_base_path',
-            default='../core/dataset/NRS',
+            default='/workspace/disk1',
             type=str,
             help='Data location')
 
@@ -268,7 +268,7 @@ def parse_opts():
                         help='Inference Interval of frame')
 
     parser.add_argument('--db_path',
-            default='/dataset/NRS/meta_info.db',
+            default='/workspace/jiwoo/NRS/meta_info.db',
             type=str,
             help='Data location')
         
