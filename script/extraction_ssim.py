@@ -49,7 +49,7 @@ def main():
     frame_path=[]
 
     data_path = "/workspace/disk1/robot/vihub/img/"
-    json_data_path = "/workspace/disk1/robot/vihub/anno/"
+    json_data_path = "/workspace/disk1/robot/vihub/anno/v3/"
     for i in range(len(os.listdir(json_data_path))):
         json_data_list.append(json_data_path + os.listdir(json_data_path)[i])
     
@@ -85,6 +85,8 @@ def main():
 
             # NRS - RS split
             for k in range(len(json_data_list)):
+                # print(video.split("/")[-1])
+                # print("json_data_list[k]",json_data_list[k])
                 if video.split("/")[-1] in json_data_list[k]:
                     ori_json = json_data_list[k]
                     print("json",ori_json)
@@ -102,52 +104,52 @@ def main():
                         for l in range(len(total_json)):
                             idx.append(total_json[l]['start'])
                             idx.append(total_json[l]['end'])
-                        # print(idx)
+                        print(idx)
                         
-            for k in range(0,len(idx)//2,2):
-                nrs_frame_list.append(frame_path_copy[idx[k]:idx[k+1]+1])
-            nrs_frame_list = sum(nrs_frame_list, [])
-            # print('nrs_frame_list',nrs_frame_list)
-            print("nrs_frame_list",len(nrs_frame_list))
+                    for j in range(0,len(idx)//2,2):
+                        nrs_frame_list.append(frame_path_copy[idx[j]:idx[j+1]+1])
+                    nrs_frame_list = sum(nrs_frame_list, [])
+                    # print('nrs_frame_list',nrs_frame_list)
+                    print("nrs_frame_list",len(nrs_frame_list))
 
-            rs_frame_list =  list(set(frame_path_copy) - set(nrs_frame_list))
-            print("rs_frame_list",len(rs_frame_list))
+                    rs_frame_list =  list(set(frame_path_copy) - set(nrs_frame_list))
+                    print("rs_frame_list",len(rs_frame_list))
 
-            print("sum: ", len(nrs_frame_list), "+", len(rs_frame_list), "=" , len(nrs_frame_list)+len(rs_frame_list))
-
-
-            # # NRS
-            print("=========START NRS SSIM=========")
-            ray_target_ssim_list = ray.put(nrs_frame_list)
-            nrs_ssim_score_list = ray.get([cal_ssim_score.remote(ray_target_ssim_list, 0, len(nrs_frame_list)-1) for i in range (num_cpus)])
-            # print(nrs_ssim_score_list)
-            NRS_duplicate_list=[]
-            for k in range(len(nrs_ssim_score_list)):
-                if nrs_ssim_score_list[0][k] > 0.997:
-                    NRS_duplicate_list.append(nrs_ssim_score_list[0][k])
-            NRS_duplicate = len(NRS_duplicate_list)
-            NRS_non_duplicate = len(nrs_frame_list) - len(NRS_duplicate_list)
+                    print("sum: ", len(nrs_frame_list), "+", len(rs_frame_list), "=" , len(nrs_frame_list)+len(rs_frame_list))
 
 
-            # # RS
-            print("=========START RS SSIM=========")
-            ray_target_ssim_list = ray.put(rs_frame_list)
-            rs_ssim_score_list = ray.get([cal_ssim_score.remote(ray_target_ssim_list, 0, len(rs_frame_list)-1) for i in range (num_cpus)])
-            # print(rs_ssim_score_list)
-            RS_duplicate_list=[]
-            for k in range(len(rs_ssim_score_list)):
-                if rs_ssim_score_list[0][k] > 0.997:
-                    RS_duplicate_list.append(rs_ssim_score_list[0][k])
-            RS_duplicate = len(RS_duplicate_list)
-            RS_non_duplicate = len(rs_frame_list) - len(RS_duplicate_list)
+                    # # NRS
+                    print("=========START NRS SSIM=========")
+                    ray_target_ssim_list = ray.put(nrs_frame_list)
+                    nrs_ssim_score_list = ray.get([cal_ssim_score.remote(ray_target_ssim_list, 0, len(nrs_frame_list)-1) for i in range (num_cpus)])
+                    # print(nrs_ssim_score_list)
+                    NRS_duplicate_list=[]
+                    for k in range(len(nrs_ssim_score_list)):
+                        if nrs_ssim_score_list[0][k] > 0.997:
+                            NRS_duplicate_list.append(nrs_ssim_score_list[0][k])
+                    NRS_duplicate = len(NRS_duplicate_list)
+                    NRS_non_duplicate = len(nrs_frame_list) - len(NRS_duplicate_list)
 
 
-            f = open('/workspace/disk1/meta//meta/nrs_info_0609.csv','a', newline='')
-            wr = csv.writer(f)
-            # patient	video	RS-non_duplicate	RS-duplicate	NRS-non_duplicate	NRS-duplicate
-            wr.writerow([patient, video," ", RS_non_duplicate,RS_duplicate,NRS_non_duplicate,NRS_duplicate])
-            # wr.writerow([patient.split("/")[-1], video.split("/")[-1]," ", Total_anno])
-            f.close()
+                    # # RS
+                    print("=========START RS SSIM=========")
+                    ray_target_ssim_list = ray.put(rs_frame_list)
+                    rs_ssim_score_list = ray.get([cal_ssim_score.remote(ray_target_ssim_list, 0, len(rs_frame_list)-1) for i in range (num_cpus)])
+                    # print(rs_ssim_score_list)
+                    RS_duplicate_list=[]
+                    for k in range(len(rs_ssim_score_list)):
+                        if rs_ssim_score_list[0][k] > 0.997:
+                            RS_duplicate_list.append(rs_ssim_score_list[0][k])
+                    RS_duplicate = len(RS_duplicate_list)
+                    RS_non_duplicate = len(rs_frame_list) - len(RS_duplicate_list)
+
+
+                    f = open('/workspace/disk1/meta//meta/nrs_info_0614.csv','a', newline='')
+                    wr = csv.writer(f)
+                    # patient	video	RS-non_duplicate	RS-duplicate	NRS-non_duplicate	NRS-duplicate
+                    wr.writerow([patient, video," ", RS_non_duplicate,RS_duplicate,NRS_non_duplicate,NRS_duplicate])
+                    # wr.writerow([patient.split("/")[-1], video.split("/")[-1]," ", Total_anno])
+                    f.close()
 
 
     

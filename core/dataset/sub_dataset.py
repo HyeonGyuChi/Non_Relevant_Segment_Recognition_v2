@@ -15,7 +15,8 @@ from core.util.parser import DBParser
 
 
 class SubDataset(Dataset):
-    def __init__(self, args, state='train', sample_type='boundary'):
+    # def __init__(self, args, state='train', sample_type='boundary'):
+    def __init__(self, args, state, sample_type='boundary'):
         super().__init__()
         
         self.args = args
@@ -26,7 +27,7 @@ class SubDataset(Dataset):
 
         self.dp = DBParser(self.args, state=self.state)
         self.load_data()
-                
+        
         # augmentation setup
         if self.args.experiment_type == 'ours':
             if self.args.model == 'mobile_vit':
@@ -38,6 +39,7 @@ class SubDataset(Dataset):
         
         self.aug = d_transforms[self.state]
         
+
     def __len__(self):
         return len(self.img_list)
 
@@ -52,10 +54,10 @@ class SubDataset(Dataset):
     
     def load_data(self):
         self.dp.load_data()
-
         patient_data = self.dp.get_patient_assets()
+
         anno_df_list = []
-        
+
         for patient, data in patient_data.items():
             anno_df = pd.DataFrame({
                 'img_path': data[0],
@@ -64,14 +66,15 @@ class SubDataset(Dataset):
 
             if self.sample_type == 'boundary':
                 # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
-                anno_df['patient'] = anno_df.img_path.str.split('/').str[6]
+                # anno_df['patient'] = anno_df.img_path.str.split('/').str[6]
+                anno_df['patient'] = patient
                 anno_df = self.bs.sample(anno_df)[['img_path', 'class_idx']] 
 
             anno_df_list.append(anno_df)
             # print(patient, '   end')
         
         refine_df = pd.concat(anno_df_list)
-        print(refine_df.head())
+        # print("refine_df.head()\n",refine_df.head())
 
         # hueristic_sampling
         if self.sample_type == 'boundary':
@@ -104,6 +107,9 @@ class SubDataset(Dataset):
         self.label_list = assets_df.class_idx.tolist()
 
         self.assets_df = assets_df
+        # pd.set_option('display.max.colwidth', 90)
+        # print("SubDataset: \n",self.assets_df) 
+
     
     def number_of_rs_nrs(self):
         return self.label_list.count(0) ,self.label_list.count(1)
@@ -136,3 +142,12 @@ class SubDataset(Dataset):
             )
 
         return patient_per_dic
+
+    def get_patient_list(self):
+        full_patient_list=[]
+        for i in range(len(self.assets_df)):
+            # full_patient_list.append(self.args.data_base_path + "/toyset/" + "/".join(self.assets_df["img_path"].values[i].split("/")[7:10]))
+            full_patient_list.append(self.args.data_base_path + "/".join(self.assets_df["img_path"].values[i].split("/")[7:10]))      
+        full_patient_list=list(set(full_patient_list))
+
+        return full_patient_list

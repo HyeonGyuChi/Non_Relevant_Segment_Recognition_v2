@@ -5,32 +5,31 @@ from glob import glob
 import natsort
 import torch
 import torch.nn as nn
-
 from core.model import get_model, get_loss, configure_optimizer
 from core.dataset import load_data
 # from core.util.hem import HEMHelper, OnlineHEM
 from core.util.hem import OnlineHEM
 from core.util.metric import MetricHelper
+from torch.utils.data import DataLoader
+from core.dataset import SubDataset
+from core.util.misc import save_dict_to_csv
 
-
-class Trainer():
+class Trainer_autolabel():
     def __init__(self, args):
         self.args = args        
         self.setup()
-        
+    
     def setup(self):
         self.current_epoch = 1
         self.current_state = 'train' # base set
-        
+         
         # make log directory
         self.make_log_dir()
         self.save_hyperparams()
     
         print('======= Load model =======')
         self.model = get_model(self.args).to(self.args.device)
-        if self.args.num_gpus > 1:
-            self.model = torch.nn.DataParallel(self.model, device_ids=list(range(self.args.num_gpus)))
-        
+
         print('======= Load loss =======')
         self.loss_fn = get_loss(self.args)
         
@@ -38,9 +37,42 @@ class Trainer():
         self.optimizer, self.scheduler = configure_optimizer(self.args, self.model)
     
         print('======= Load dataset =======')
-        self.train_loader, self.val_loader = load_data(self.args)
-        print(len(self.train_loader), len(self.val_loader))
-    
+        # self.train_loader, self.val_loader = load_data(self.args)
+
+        trainset = SubDataset(self.args, state='train', sample_type=self.args.sample_type)
+        print("Train Data     :",(trainset)) 
+        print("Train Data len     :",len(trainset)) 
+        print()
+        valset   = SubDataset(self.args, state='val', sample_type=self.args.sample_type)
+        print("Validation Data:",(valset))
+        print("Validation Data len:",len(valset))
+        print()
+        
+        if self.args.sampler == 'oversampler':
+            self.train_loader = DataLoader(trainset,
+                                    batch_size=self.args.batch_size,
+                                    num_workers=self.args.num_workers,
+                                    sampler=OverSampler(trainset.label_list, self.args.batch_size//2, self.args.batch_size),
+                                    pin_memory=True,
+                                    )
+        else:
+            self.train_loader = DataLoader(trainset,
+                                batch_size=self.args.batch_size,
+                                num_workers=self.args.num_workers,
+                                shuffle=True,
+                                pin_memory=True,
+                                )
+        self.val_loader = DataLoader(valset,
+                                batch_size=self.args.batch_size,
+                                num_workers=self.args.num_workers,
+                                shuffle=False,
+                                pin_memory=True,
+                                )
+        
+        print("Train DataLoader     :",len(self.train_loader)) 
+        print("Validation DataLoader:",len(self.val_loader))
+
+
         print('======= Set HEM Helper =======')
         self.hem_helper = OnlineHEM(self.args)
     
@@ -100,11 +132,11 @@ class Trainer():
     def train(self):
         self.model.train()
         cnt = 0
-        
         for data in tqdm(self.train_loader, desc='[Train Phase] : '):
             self.optimizer.zero_grad()
             
             _, x, y = data
+            print("train y: ",y)
             if self.args.device == 'cuda':
                 x = x.to(self.args.device)
                 y = y.to(self.args.device)
@@ -124,17 +156,20 @@ class Trainer():
     
     @torch.no_grad()
     def valid(self):
+        import os
         self.model.eval()
-        cnt = 0
 
         for data in tqdm(self.val_loader, desc='[Validation Phase] : '):
             _, x, y = data
+            # print("valida x: ",x)
+            print("valida y: ",y)
             
             if self.args.device == 'cuda':
                 x = x.to(self.args.device)
                 y = y.to(self.args.device)
                 
             y_hat, loss = self.forward(x, y)
+        
             
             self.metric_helper.write_loss(loss.item(), 'valid')
             self.metric_helper.write_preds(y_hat.argmax(dim=1).detach().cpu(), y.cpu()) # MetricHelper 에 저장
@@ -146,13 +181,12 @@ class Trainer():
         self.metric_helper.update_loss('valid')
         self.metric_helper.save_loss_pic()
         metric = self.metric_helper.calc_metric()
-        
-        from core.util.misc import save_dict_to_csv
+
         # save result.csv 
         metrics_save_data = dict({'Model': self.args.model, 'Epoch': self.current_epoch}, **metric)
         save_dict_to_csv(metrics_save_data, os.path.join(self.args.save_path, 'train_metric.csv'))
 
-
+        
         if self.args.lr_scheduler == 'reduced':
             self.scheduler.step(self.metric_helper.get_loss('valid'))
         else:
@@ -160,10 +194,10 @@ class Trainer():
         
         if self.metric_helper.update_best_metric(metric):
             self.save_checkpoint()
-        
+
+
     def forward(self, x, y):
         outputs = self.model(x)
-        
         return self.calc_loss(outputs, y)
     
     def calc_loss(self, outputs, y):
@@ -172,8 +206,7 @@ class Trainer():
             loss = self.hem_helper.apply(emb, y_hat, y, self.model.proxies)
         else:
             y_hat = outputs
-            loss = self.loss_fn(y_hat, y)
-            
+            loss = self.loss_fn(y_hat, y) 
         return y_hat, loss
     
     def save_checkpoint(self):
@@ -197,14 +230,14 @@ class Trainer():
 
         if self.args.num_gpus > 1:
             ckpt_state = {
-                'model': self.model.state_dict(),
+                'model': self.model.feature_module.state_dict(),
                 'optimizer': self.optimizer.state_dict(),
                 'scheduler': self.scheduler.state_dict(),
                 'epoch': self.current_epoch,
             }
         else:
             ckpt_state = {
-                'model': self.model.feature_module.state_dict(),
+                'model': self.model.state_dict(),
                 'optimizer': self.optimizer.state_dict(),
                 'scheduler': self.scheduler.state_dict(),
                 'epoch': self.current_epoch,
@@ -223,7 +256,7 @@ class Trainer():
 
             if self.args.num_gpus > 1:
                 ckpt_state = {
-                    'model': self.model.module.feature_module.state_dict(),
+                    'model': self.model.feature_module.state_dict(),
                     'optimizer': self.optimizer.state_dict(),
                     'scheduler': self.scheduler.state_dict(),
                     'epoch': self.current_epoch,
@@ -240,5 +273,3 @@ class Trainer():
             print('[+] save checkpoint (Last Epoch) : ', save_path)
             
             
-
-        

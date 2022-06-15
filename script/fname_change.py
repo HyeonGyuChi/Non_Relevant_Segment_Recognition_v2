@@ -1,4 +1,3 @@
-# test
 import os
 import shutil
 from tqdm import tqdm

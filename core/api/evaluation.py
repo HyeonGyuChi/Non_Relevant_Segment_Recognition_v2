@@ -65,6 +65,7 @@ class Evaluator():
         """
         # 1. prepare data(assets)
         # 2. calc metric
+        
         self.metric_helper.write_preds(np.array(self.predict_list), np.array(self.gt_list))
         metrics = self.metric_helper.calc_metric()
 
@@ -148,6 +149,7 @@ class Evaluator():
             self.reporter.save_report() # save report
     
     def evaluation(self, results_dict=None, output_path_list=None):
+        
         # exception
         if results_dict is None and output_path_list is None:
             raise 'No input data!'
@@ -164,6 +166,10 @@ class Evaluator():
                 
                 for video_name in patient_res.keys():
                     self.set_assets(patient_res[video_name])
+                    
+                    with open(self.base_save_path+"/terminal_logs_EVALUATION.txt","a") as f:
+                        f.write("patient_no",patient_no)
+                        f.write("video_name",video_name)
                     
                     # for calc patients metric
                     video_metrics = self.calc()
@@ -200,8 +206,9 @@ class Evaluator():
                 # for calc total patients CR, OR
                 patients_metrics_list.append(patient_metrics)
                 
+
         self.update_report(patient_no, video_name, patients_metrics_list, target='all')
-                
+        
     def sort_for_patient(self, output_path_list):
         """
             patient_path_list

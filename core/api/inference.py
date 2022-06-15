@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
@@ -22,7 +23,10 @@ class InferenceDB():
         model_path = get_inference_model_path(self.args.restore_path, load_type='best')
         ckpt_state = torch.load(model_path)
         
+        
         self.model = get_model(self.args).to(self.args.device)
+        if self.args.num_gpus > 1:
+            self.model = torch.nn.DataParallel(self.model, device_ids=list(range(self.args.num_gpus)))
         self.model.load_state_dict(ckpt_state['model'])
     
     def set_inference_interval(self, inference_interval):
@@ -55,16 +59,18 @@ class InferenceDB():
         # data loder
         self.load_dataset()
         results = {}
+        # print("inference self.video_assets",self.video_assets)
         
         for patient in self.video_assets.keys():
             patient_data = self.video_assets[patient]
             results[patient] = {}
             
             for video_name in patient_data.keys():
-                patient = self.find_patient_no(video_name)
+                # patient = self.find_patient_no(video_name)
                 each_patients_save_dir = self.args.save_path + '/inference_results/{}'.format(patient)
                 
                 data = patient_data[video_name]
+                print("inference data",data)
                 
                 self.dset.set_img_list(data[0])
                 dl = DataLoader(dataset=self.dset,
@@ -95,23 +101,39 @@ class InferenceDB():
                     target_img_list += sample['img_path'] # target img path
                     target_frame_idx_list += sample['db_idx'] # target DB
 
-                print("target_frame_idx_list",target_frame_idx_list)
-                target_frame_idx_list = list(map(int, target_frame_idx_list)) # '0000000001' -> 1
-                
-                gt_list = data[1]
+                # print("target_frame_idx_list",target_frame_idx_list)
+                # target_frame_idx_list = list(map(int, target_frame_idx_list)) # '0000000001' -> 1
+                try:
+                    target_frame_idx_list_new = list(map(int, target_frame_idx_list)) 
+                    # '0000000001' -> 1
+                except:
+                    target_frame_idx_list_new=[]
+                    for i in range(len(target_frame_idx_list)):
+                        if "-" in target_frame_idx_list[i]:
+                            target_frame_idx = target_frame_idx_list[i].split("-")[-1]
+                            target_frame_idx_list_new.append(target_frame_idx)
+                        else:
+                            target_frame_idx_list_new.append(target_frame_idx_list[i])
+                            
+
                 if gt_list is None:
                     gt_list = list(np.zeros(len(predict_list))-1)
+                else:
+                    gt_list = list(self.video_assets[patient][video_name][1])
                 
                 predict_df = pd.DataFrame({
-                            'frame_idx': target_frame_idx_list,
+                            'frame_idx': target_frame_idx_list_new,
                             'predict': predict_list,
                             'gt': gt_list,
                             'target_img': target_img_list,
                         })
                 
+
                 self.save_results(predict_df, each_patients_save_dir, video_name)
                 
                 results[patient][video_name] = predict_df
+                
+
             
         return results
     

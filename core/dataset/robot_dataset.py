@@ -58,12 +58,15 @@ class RobotDataset(Dataset):
         
         patient_data = self.ap.get_patient_assets()
         anno_df_list = []
-        print("load_data_patient_data..items()",patient_data.items())
+        # print("load_data_patient_data..items()",patient_data.items())
         for patient, data in patient_data.items():
             anno_df = pd.DataFrame({
                 'img_path': data[0],
                 'class_idx': data[1],
             })
+            pd.set_option('display.max_colwidth', 1000)
+            pd.set_option('display.max_rows', 500)
+            print("train_before_self.assets_df\n",anno_df)
         
             if self.sample_type == 'boundary':
                 # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
@@ -72,9 +75,8 @@ class RobotDataset(Dataset):
             
             anno_df_list.append(anno_df)
             # print(patient, '   end')
-        
         refine_df = pd.concat(anno_df_list)
-        print(refine_df.head())
+        
 
         # hueristic_sampling
         if self.sample_type == 'boundary':

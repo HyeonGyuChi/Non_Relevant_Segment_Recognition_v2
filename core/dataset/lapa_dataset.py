@@ -15,17 +15,14 @@ from core.util.sampler import BoundarySampler
 
 
 class LapaDataset(Dataset):
-    def __init__(self, args, state='train', sample_type='boundary'):
+    def __init__(self, args, state, sample_type='boundary'):
         super().__init__()
         
         self.args = args
         self.state = state
         self.sample_type = sample_type    
         self.img_list, self.label_list = None, None
-
-        # 작성중
         self.bs = BoundarySampler(self.args.IB_ratio, self.args.WS_ratio) 
-        # 작성중
         self.ap = AssetParser(self.args, state=self.state) 
         self.load_data()
          
@@ -43,7 +40,6 @@ class LapaDataset(Dataset):
     
 
     def __len__(self):
-        # print("len(self.img_list)",len(self.img_list))
         return len(self.img_list)
 
     # return img, label
@@ -55,54 +51,30 @@ class LapaDataset(Dataset):
 
         return img_path, img, label
 
-    # 작성중
+
     def load_data(self):
         self.ap.load_data()
-        # appointment_assets_path 존재하고  동시에 arg.train_stage 중 train/mini을 포함한 state라면 
-        # -> load_data_from_path: appointment_assets_path의 csv 읽고 data_dict 설정
-
-        # 아니면 
-        # -> load_img_path_list: 
-        # -> make_anno:
-
         patient_data = self.ap.get_patient_assets()
-        # self.data_dict[patient].keys  중 self.data_dict[patient][keys]가 
-        #img -> img data
-        #anno 포함이면 -> label_list에 추가
-        #anno 미포함이면 -> label_list = None
-
-        #-> label_list None이 아니고 동시에 img-label 개수가 안 맞으면 img_list = img_list[:len(label_list)]
-        # patient_dict[patient] = [img_list, label_list]
-        # return patient_dict
-
+        
         anno_df_list = []
-        # print("load_data_patient_data",patient_data)
-        # print("load_data_patient_data.items()",patient_data.items())
-
+       
         for patient, data in patient_data.items():
             anno_df = pd.DataFrame({
                 'img_path': data[0],
                 'class_idx': data[1],
             })
-            
-            
-            # print("patient",patient)
-            # print("anno_df\n",anno_df)
-
+            pd.set_option('display.max_colwidth', 1000)
+            pd.set_option('display.max_rows', 500)
+            print("train_before_self.assets_df\n",anno_df)
+          
             if self.sample_type == 'boundary':
                 # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
                 anno_df['patient'] = anno_df.img_path.astype(str).str.split('/').str[7]
 
                 anno_df = self.bs.sample(anno_df)[['img_path', 'class_idx']] 
-                #print("second anno_df\n",anno_df)
-            
+     
             anno_df_list.append(anno_df)
-            # print("anno_df_list\n",anno_df_list)
-            # print(patient, '   end')
-
-        
         refine_df = pd.concat(anno_df_list)
-        # print("refine_df.head()",refine_df.head())
 
         # hueristic_sampling
         if self.sample_type == 'boundary':
@@ -144,9 +116,6 @@ class LapaDataset(Dataset):
     def number_of_rs_nrs(self):
         return self.label_list.count(0) ,self.label_list.count(1)
 
-     # 해당 robot_dataset의 patinets별 assets 개수 
-     # (hem train할때 valset만들어서 hem_helper의 args.hem_per_patinets에서 사용됨.)     
-     # 작성중
     def number_of_patient_rs_nrs(self):
         patient_per_dic = {}
 

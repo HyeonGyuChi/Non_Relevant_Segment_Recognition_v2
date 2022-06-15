@@ -70,7 +70,7 @@ class TIMM(nn.Module):
                 nn.Dropout(p=self.args.dropout_prob, inplace=True),
                 nn.Linear(n_feat, 2)
             )
-        
+
     def forward(self, x):
         features = self.feature_module(x)
         
