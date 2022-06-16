@@ -14,7 +14,8 @@ def main():
     os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda_list
 
     # training
-    trainer = Trainer(args)
+    # trainer = Trainer(args,version="WithSSIM")
+    trainer = Trainer(args,version="WithoutSSIM")
     trainer.fit()
     
     # inference

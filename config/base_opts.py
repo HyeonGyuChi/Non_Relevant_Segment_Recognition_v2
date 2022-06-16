@@ -38,7 +38,7 @@ def parse_opts():
             help='What device to use for training or validation model')
 
     parser.add_argument('--max_epoch',
-            default=30,
+            default=2,
             type=int,
             help='Maximum training epoch')
 
@@ -112,7 +112,7 @@ def parse_opts():
 
     # -------------- Dataset --------------------
     parser.add_argument('--dataset', 
-            default='lapa',
+            default='robot',
             type=str, 
             help='choose a surgery dataset [robot / lapa]')
     

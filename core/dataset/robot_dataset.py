@@ -16,12 +16,13 @@ from core.util.sampler import BoundarySampler
 
 
 class RobotDataset(Dataset):
-    def __init__(self, args, state='train', sample_type='boundary'):
+    def __init__(self, args, version, state='train', sample_type='boundary'):
         super().__init__()
         
         self.args = args
         self.state = state
         self.sample_type = sample_type    
+        self.version = version
         self.img_list, self.label_list = None, None
         self.bs = BoundarySampler(self.args.IB_ratio, self.args.WS_ratio)
         
@@ -54,62 +55,71 @@ class RobotDataset(Dataset):
     
 
     def load_data(self):
-        self.ap.load_data()
-        
-        patient_data = self.ap.get_patient_assets()
-        anno_df_list = []
-        # print("load_data_patient_data..items()",patient_data.items())
-        for patient, data in patient_data.items():
-            anno_df = pd.DataFrame({
-                'img_path': data[0],
-                'class_idx': data[1],
-            })
-            pd.set_option('display.max_colwidth', 1000)
-            pd.set_option('display.max_rows', 500)
-            print("train_before_self.assets_df\n",anno_df)
-        
+        if self.version == "WithoutSSIM":
+            self.ap.load_data()
+            patient_data = self.ap.get_patient_assets()
+            anno_df_list = []
+            # print("load_data_patient_data..items()",patient_data.items())
+            for patient, data in patient_data.items():
+                anno_df = pd.DataFrame({
+                    'img_path': data[0],
+                    'class_idx': data[1],
+                })
+                # pd.set_option('display.max_colwidth', 1000)
+                # pd.set_option('display.max_rows', 500)
+                # print("train_before_self.assets_df\n",anno_df)
+            
+                if self.sample_type == 'boundary':
+                    # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
+                    anno_df['patient'] = anno_df.img_path.str.split('/').str[6]
+                    anno_df = self.bs.sample(anno_df)[['img_path', 'class_idx']] 
+                
+                anno_df_list.append(anno_df)
+                # print(patient, '   end')
+            refine_df = pd.concat(anno_df_list)
+            
+
+            # hueristic_sampling
             if self.sample_type == 'boundary':
-                # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
-                anno_df['patient'] = anno_df.img_path.str.split('/').str[6]
-                anno_df = self.bs.sample(anno_df)[['img_path', 'class_idx']] 
-            
-            anno_df_list.append(anno_df)
-            # print(patient, '   end')
-        refine_df = pd.concat(anno_df_list)
+                assets_df = refine_df
+
+            elif self.sample_type == 'random':
+                print('\n\n\t ==> RANDOM SAMPLING ... IB_RATIO: {}\n\n'.format(self.args.IB_ratio))
+                # random_sampling and setting IB:OOB data ratio
+                # ratio로 구성 불가능 할 경우 전체 set 모두 사용
+                nrs_ids = refine_df.index[refine_df['class_idx'] == 1].tolist()
+                nrs_df = refine_df.loc[nrs_ids]
+                rs_df = refine_df.drop(nrs_ids, inplace=True)
+                
+                max_ib_count, target_ib_count = len(rs_df), int(len(nrs_df)) * self.args.IB_ratio
+                sampling_ib_count = max_ib_count if max_ib_count < target_ib_count else target_ib_count
+                print('Random sampling from {} to {}'.format(max_ib_count, sampling_ib_count))
+                
+                rs_df = rs_df.sample(n=sampling_ib_count, replace=False) # 중복뽑기x, random seed 고정, OOB개수의 IB_ratio 개
+                assets_df = pd.concat([rs_df, nrs_df])
+                
+            elif self.sample_type == 'all':
+                print('\nSample type ALL')
+                assets_df = refine_df
+            else:
+                raise 'Load Dataset Error'
+
+            # last processing
+            assets_df = assets_df[['img_path', 'class_idx']]
+            self.img_list = assets_df.img_path.tolist()
+            self.label_list = assets_df.class_idx.tolist()
+
+            self.assets_df = assets_df
         
+        elif self.version == "WithSSIM":
+            pass
+            # annotation json 읽어와서
+            # annotation의 fps로 가져오고 가져온 img-label 정렬
+            # class=2인 annotation의 첫번째, 마지막만 남기고 빼기 (img, label 모두) => 매칭 확인 필요
 
-        # hueristic_sampling
-        if self.sample_type == 'boundary':
-            assets_df = refine_df
 
-        elif self.sample_type == 'random':
-            print('\n\n\t ==> RANDOM SAMPLING ... IB_RATIO: {}\n\n'.format(self.args.IB_ratio))
-            # random_sampling and setting IB:OOB data ratio
-            # ratio로 구성 불가능 할 경우 전체 set 모두 사용
-            nrs_ids = refine_df.index[refine_df['class_idx'] == 1].tolist()
-            nrs_df = refine_df.loc[nrs_ids]
-            rs_df = refine_df.drop(nrs_ids, inplace=True)
-            
-            max_ib_count, target_ib_count = len(rs_df), int(len(nrs_df)) * self.args.IB_ratio
-            sampling_ib_count = max_ib_count if max_ib_count < target_ib_count else target_ib_count
-            print('Random sampling from {} to {}'.format(max_ib_count, sampling_ib_count))
-            
-            rs_df = rs_df.sample(n=sampling_ib_count, replace=False) # 중복뽑기x, random seed 고정, OOB개수의 IB_ratio 개
-            assets_df = pd.concat([rs_df, nrs_df])
-            
-        elif self.sample_type == 'all':
-            print('\nSample type ALL')
-            assets_df = refine_df
-        else:
-            raise 'Load Dataset Error'
 
-        # last processing
-        assets_df = assets_df[['img_path', 'class_idx']]
-        self.img_list = assets_df.img_path.tolist()
-        self.label_list = assets_df.class_idx.tolist()
 
-        self.assets_df = assets_df
-    
     def number_of_rs_nrs(self):
         return self.label_list.count(0) ,self.label_list.count(1)
 

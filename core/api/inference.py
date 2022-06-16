@@ -70,7 +70,7 @@ class InferenceDB():
                 each_patients_save_dir = self.args.save_path + '/inference_results/{}'.format(patient)
                 
                 data = patient_data[video_name]
-                print("inference data",data)
+                # print("inference data",data)
                 
                 self.dset.set_img_list(data[0])
                 dl = DataLoader(dataset=self.dset,
@@ -116,10 +116,10 @@ class InferenceDB():
                             target_frame_idx_list_new.append(target_frame_idx_list[i])
                             
 
-                if gt_list is None:
-                    gt_list = list(np.zeros(len(predict_list))-1)
-                else:
+                try:
                     gt_list = list(self.video_assets[patient][video_name][1])
+                except:
+                    gt_list = list(np.zeros(len(predict_list))-1) # gt_list ==None
                 
                 predict_df = pd.DataFrame({
                             'frame_idx': target_frame_idx_list_new,

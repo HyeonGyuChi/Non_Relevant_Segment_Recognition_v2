@@ -211,8 +211,6 @@ class AssetParser():
                     }
         
     def load_img_path_list(self):
-        print("load_img_path_list")
-        
         for patient in tqdm(self.patients_list):
             p_path = self.img_base_path + f'/{patient}'
             video_list = natsort.natsorted(os.listdir(p_path))
@@ -249,7 +247,6 @@ class AssetParser():
 
 
     def make_anno(self):
-        print("make anno")
         anno_list = natsort.natsorted(glob(self.anno_path + '/*.json'))
         
         for anno_path in tqdm(anno_list):

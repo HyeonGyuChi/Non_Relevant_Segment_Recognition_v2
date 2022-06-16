@@ -63,9 +63,9 @@ class LapaDataset(Dataset):
                 'img_path': data[0],
                 'class_idx': data[1],
             })
-            pd.set_option('display.max_colwidth', 1000)
-            pd.set_option('display.max_rows', 500)
-            print("train_before_self.assets_df\n",anno_df)
+            # pd.set_option('display.max_colwidth', 1000)
+            # pd.set_option('display.max_rows', 500)
+            # print("train_before_self.assets_df\n",anno_df)
           
             if self.sample_type == 'boundary':
                 # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))

@@ -167,9 +167,6 @@ class Evaluator():
                 for video_name in patient_res.keys():
                     self.set_assets(patient_res[video_name])
                     
-                    with open(self.base_save_path+"/terminal_logs_EVALUATION.txt","a") as f:
-                        f.write("patient_no",patient_no)
-                        f.write("video_name",video_name)
                     
                     # for calc patients metric
                     video_metrics = self.calc()

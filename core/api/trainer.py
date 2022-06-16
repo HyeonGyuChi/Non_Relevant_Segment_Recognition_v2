@@ -14,8 +14,9 @@ from core.util.metric import MetricHelper
 
 
 class Trainer():
-    def __init__(self, args):
+    def __init__(self, args,version):
         self.args = args        
+        self.version = version
         self.setup()
         
     def setup(self):
@@ -38,7 +39,7 @@ class Trainer():
         self.optimizer, self.scheduler = configure_optimizer(self.args, self.model)
     
         print('======= Load dataset =======')
-        self.train_loader, self.val_loader = load_data(self.args)
+        self.train_loader, self.val_loader = load_data(self.args,self.version)
         print(len(self.train_loader), len(self.val_loader))
     
         print('======= Set HEM Helper =======')

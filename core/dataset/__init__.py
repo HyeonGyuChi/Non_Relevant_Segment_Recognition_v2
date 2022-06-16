@@ -12,10 +12,11 @@ __all__ = [
 ]
 
 
-def load_data(args):
+def load_data(args,version):
+    print(version)
     if args.dataset == 'robot':
-        trainset = RobotDataset(args, state='train', sample_type=args.sample_type)
-        valset = RobotDataset(args, state='val', sample_type=args.sample_type)
+        trainset = RobotDataset(args, version, state='train', sample_type=args.sample_type)
+        valset = RobotDataset(args, version, state='val', sample_type=args.sample_type)
         
     elif args.dataset == 'lapa':
         trainset = LapaDataset(args, state='train', sample_type=args.sample_type)
