@@ -211,7 +211,7 @@ class AssetParser():
                     }
         
     def load_img_path_list(self):
-        for patient in tqdm(self.patients_list):
+        for patient in tqdm(self.patients_list[:2]):
             p_path = self.img_base_path + f'/{patient}'
             video_list = natsort.natsorted(os.listdir(p_path))
 

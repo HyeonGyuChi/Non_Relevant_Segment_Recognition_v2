@@ -19,8 +19,8 @@ def load_data(args,version):
         valset = RobotDataset(args, version, state='val', sample_type=args.sample_type)
         
     elif args.dataset == 'lapa':
-        trainset = LapaDataset(args, state='train', sample_type=args.sample_type)
-        valset = LapaDataset(args, state='val', sample_type=args.sample_type)
+        trainset = LapaDataset(args, version, state='train', sample_type=args.sample_type)
+        valset = LapaDataset(args, version, state='val', sample_type=args.sample_type)
 
     if args.sampler == 'oversampler':
         train_loader = DataLoader(trainset,
