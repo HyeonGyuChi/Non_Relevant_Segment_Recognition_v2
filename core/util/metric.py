@@ -93,6 +93,8 @@ class MetricHelper():
         TN = float(metrics['TN'])
         FN = float(metrics['FN'])
 
+    
+
         metrics['CR'] = (TP - FP) / (FN + TP + FP) # 잘못예측한 OOB / predict OOB + 실제 OOB # Confidence Ratio
         metrics['OR'] = FP / (FN + TP + FP) # Over estimation ratio
         metrics['Mean_metric'] = (metrics['CR'] + (1-metrics['OR'])) / 2 # for train
