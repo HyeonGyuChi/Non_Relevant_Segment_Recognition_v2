@@ -83,10 +83,15 @@ class MetricHelper():
         }
 
         # np casting for zero divide to inf
-        TP = np.float16(metrics['TP'])
-        FP = np.float16(metrics['FP'])
-        TN = np.float16(metrics['TN'])
-        FN = np.float16(metrics['FN'])
+        # TP = np.float16(metrics['TP'])
+        # FP = np.float16(metrics['FP'])
+        # TN = np.float16(metrics['TN'])
+        # FN = np.float16(metrics['FN'])
+
+        TP = float(metrics['TP'])
+        FP = float(metrics['FP'])
+        TN = float(metrics['TN'])
+        FN = float(metrics['FN'])
 
         metrics['CR'] = (TP - FP) / (FN + TP + FP) # 잘못예측한 OOB / predict OOB + 실제 OOB # Confidence Ratio
         metrics['OR'] = FP / (FN + TP + FP) # Over estimation ratio
