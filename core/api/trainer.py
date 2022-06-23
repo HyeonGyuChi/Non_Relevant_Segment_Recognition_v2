@@ -8,8 +8,9 @@ import torch.nn as nn
 
 from core.model import get_model, get_loss, configure_optimizer
 from core.dataset import load_data
-from core.util.hem import HEMHelper, OnlineHEM
+from core.util.hem import OnlineHEM
 from core.util.metric import MetricHelper
+from core.util.misc import *
 
 
 class Trainer():
@@ -114,9 +115,9 @@ class Trainer():
             loss.backward()
             self.optimizer.step()
             
-            cnt += 1
-            if cnt > 3:
-                break
+            # cnt += 1
+            # if cnt > 3:
+            #     break
             
         self.metric_helper.update_loss('train')
     
@@ -137,13 +138,16 @@ class Trainer():
             self.metric_helper.write_loss(loss.item(), 'valid')
             self.metric_helper.write_preds(y_hat.argmax(dim=1).detach().cpu(), y.cpu()) # MetricHelper 에 저장
             
-            cnt += 1
-            if cnt > 3:
-                break
+            # cnt += 1
+            # if cnt > 3:
+            #     break
             
         self.metric_helper.update_loss('valid')
         self.metric_helper.save_loss_pic()
         metric = self.metric_helper.calc_metric()
+                
+        metrics_save_data = dict({'Model': self.args.model, 'Epoch': self.current_epoch}, **metric)
+        save_dict_to_csv(metrics_save_data, os.path.join(self.args.save_path, 'train_metric.csv'))
         
         if self.args.lr_scheduler == 'reduced':
             self.scheduler.step(self.metric_helper.get_loss('valid'))
@@ -152,6 +156,8 @@ class Trainer():
         
         if self.metric_helper.update_best_metric(metric):
             self.save_checkpoint()
+            
+        print('best metric : ', self.metric_helper.get_best_metric())
         
     def forward(self, x, y):
         outputs = self.model(x)

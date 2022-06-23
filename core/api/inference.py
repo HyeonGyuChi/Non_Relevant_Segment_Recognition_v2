@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 import torch
 from tqdm import tqdm
@@ -7,7 +8,6 @@ from torch.utils.data import DataLoader
 from core.model import get_model
 from core.dataset import InferDataset
 from core.util.parser import AssetParser
-from core.util.sampler import IntervalSampler
 from core.util.misc import *
 
 
@@ -61,7 +61,9 @@ class InferenceDB():
             results[patient] = {}
             
             for video_name in patient_data.keys():
-                patient = self.find_patient_no(video_name)
+                _patient = self.find_patient_no(video_name)
+                if _patient != patient:
+                    _patient = patient    
                 each_patients_save_dir = self.args.save_path + '/inference_results/{}'.format(patient)
                 
                 data = patient_data[video_name]
@@ -95,7 +97,19 @@ class InferenceDB():
                     target_img_list += sample['img_path'] # target img path
                     target_frame_idx_list += sample['db_idx'] # target DB
 
-                target_frame_idx_list = list(map(int, target_frame_idx_list)) # '0000000001' -> 1
+                t_list = []
+
+                for fi in range(len(target_frame_idx_list)):
+                    frame_name = target_frame_idx_list[fi]
+                # for frame_name in target_frame_idx_list:
+                    if '-' in frame_name:
+                        frame_name2 = frame_name.split('-')[-1]
+                        t_list += [int(frame_name2)]
+                    else:
+                        t_list += [int(frame_name)]
+
+                # target_frame_idx_list = list(map(int, target_frame_idx_list)) # '0000000001' -> 1
+                target_frame_idx_list = t_list
                 
                 gt_list = data[1]
                 if gt_list is None:
@@ -110,7 +124,7 @@ class InferenceDB():
                 
                 self.save_results(predict_df, each_patients_save_dir, video_name)
                 
-                results[patient][video_name] = predict_df
+                results[_patient][video_name] = predict_df
             
         return results
     

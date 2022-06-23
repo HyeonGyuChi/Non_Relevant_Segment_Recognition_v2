@@ -1,33 +1,32 @@
 import os
 import sys
-import random
-import numpy as np
+import random 
+import natsort
 import torch
+import pandas as pd
 from glob import glob
 from PIL import Image
-import pandas as pd
-import natsort
 from torch.utils.data import Dataset
 
 from core.dataset.aug_info import *
-from core.util.parser import AssetParser
 from core.util.sampler import BoundarySampler
+from core.util.parser import DBParser
 
 
 
-class LapaDataset(Dataset):
+class SubDataset(Dataset):
     def __init__(self, args, state='train', sample_type='boundary'):
         super().__init__()
         
         self.args = args
         self.state = state
-        self.sample_type = sample_type    
+        self.sample_type = sample_type
         self.img_list, self.label_list = None, None
         self.bs = BoundarySampler(self.args.IB_ratio, self.args.WS_ratio)
-        
-        self.ap = AssetParser(self.args, state=self.state)
+
+        self.dp = DBParser(self.args, state=self.state)
         self.load_data()
-        
+                
         # augmentation setup
         if self.args.experiment_type == 'ours':
             if self.args.model == 'mobile_vit':
@@ -51,13 +50,12 @@ class LapaDataset(Dataset):
 
         return img_path, img, label
     
-
     def load_data(self):
-        self.ap.load_data()
-        
-        patient_data = self.ap.get_patient_assets()
+        self.dp.load_data()
+
+        patient_data = self.dp.get_patient_assets()
         anno_df_list = []
-    
+        
         for patient, data in patient_data.items():
             anno_df = pd.DataFrame({
                 'img_path': data[0],
@@ -68,9 +66,10 @@ class LapaDataset(Dataset):
                 # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
                 anno_df['patient'] = anno_df.img_path.str.split('/').str[6]
                 anno_df = self.bs.sample(anno_df)[['img_path', 'class_idx']] 
-            
+
             anno_df_list.append(anno_df)
-            
+            # print(patient, '   end')
+        
         refine_df = pd.concat(anno_df_list)
         print(refine_df.head())
 
