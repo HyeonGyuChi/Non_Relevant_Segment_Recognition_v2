@@ -16,13 +16,22 @@ def main():
     db_helper.random_attr_generation()
     df = db_helper.select(cond_info=None)
     
-    # print(df)
+    # print(df.head())
+
+    df = db_helper.select(cond_info=subset_condition['train'])
+
+    print(df.head())
 
     db_helper.update(
         [['ANNOTATION_V3', 1],],
         subset_condition['train'],
         
     )
+
+    df = db_helper.select(cond_info=subset_condition['train'])
+
+    print(df.head())
+
 
     dset = SubDataset(args, sample_type='boundary')
 

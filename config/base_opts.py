@@ -209,7 +209,7 @@ def parse_opts():
             help='?')
     
     parser.add_argument('--n_stage',
-            default=2,
+            default=5,
             type=int,
             help='?')
     

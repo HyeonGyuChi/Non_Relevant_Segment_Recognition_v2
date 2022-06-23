@@ -83,14 +83,26 @@ class MetricHelper():
         }
 
         # np casting for zero divide to inf
-        TP = np.float16(metrics['TP'])
-        FP = np.float16(metrics['FP'])
-        TN = np.float16(metrics['TN'])
-        FN = np.float16(metrics['FN'])
+        # TP = np.float16(metrics['TP'])
+        # FP = np.float16(metrics['FP'])
+        # TN = np.float16(metrics['TN'])
+        # FN = np.float16(metrics['FN'])
+        TP = float(metrics['TP'])
+        FP = float(metrics['FP'])
+        TN = float(metrics['TN'])
+        FN = float(metrics['FN'])
 
-        metrics['CR'] = (TP - FP) / (FN + TP + FP) # 잘못예측한 OOB / predict OOB + 실제 OOB # Confidence Ratio
-        metrics['OR'] = FP / (FN + TP + FP) # Over estimation ratio
-        metrics['Mean_metric'] = (metrics['CR'] + (1-metrics['OR'])) / 2 # for train
+        try:
+            metrics['CR'] = (TP - FP) / (FN + TP + FP) # 잘못예측한 OOB / predict OOB + 실제 OOB # Confidence Ratio
+        except:
+            metrics['CR'] = self.EXCEPTION_NUM
+
+        try:
+            metrics['OR'] = FP / (FN + TP + FP) # Over estimation ratio
+        except:
+            metrics['OR'] = self.EXCEPTION_NUM
+
+        metrics['Mean_metric'] = (metrics['CR'] + (1-metrics['OR'])) / 2 # for train   
 
         # Predict / GT CLASS elements num
         metrics['gt_IB']= gt_list.count(self.IB_CLASS)
@@ -170,7 +182,7 @@ class MetricHelper():
 
         # calc Jaccard index (https://neo4j.com/docs/graph-data-science/current/alpha-algorithms/jaccard/)
         advanced_metrics['Jaccard'] = np.float16(advanced_metrics['TP']) / np.float16(advanced_metrics['predict_OOB'] + advanced_metrics['gt_OOB'] - advanced_metrics['TP'])
-
+        
         # exception
         for k, v in advanced_metrics.items():
             if v == 'None': # ConfusionMetrix return

@@ -63,7 +63,6 @@ class RobotDataset(Dataset):
                 'img_path': data[0],
                 'class_idx': data[1],
             })
-        
             if self.sample_type == 'boundary':
                 # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
                 anno_df['patient'] = anno_df.img_path.str.split('/').str[6]

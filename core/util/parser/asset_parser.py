@@ -10,8 +10,7 @@ from glob import glob
 
 
 from core.dataset.fold_robot import *
-# from core.dataset.fold_lapa import *
-
+from core.dataset.fold_lapa import *
 
 
 class AssetParser():
@@ -35,13 +34,19 @@ class AssetParser():
             elif self.args.datatype == 'mola':
                 self.patients_list = mola[state][self.args.fold]
         elif self.args.dataset == 'lapa':
-            pass
+            if self.args.datatype == 'vihub':
+                if self.state == 'train':
+                    self.patients_list = train_videos[self.args.fold]
+                else:
+                    self.patients_list = val_videos[self.args.fold]
         
         self.img_base_path = self.args.data_base_path + '/{}/{}/img'.format(self.args.dataset,
                                                                                 self.args.datatype)
         self.anno_path = self.args.data_base_path + '/{}/{}/anno/{}'.format(self.args.dataset,
                                                                                 self.args.datatype,
                                                                                 self.args.data_version)
+        
+        print(len(self.patients_list), self.img_base_path, self.anno_path)
             
     def set_mini_fold(self):
         f_len = len(self.patients_list)
@@ -80,18 +85,17 @@ class AssetParser():
             p_dict = self.data_dict[patient]
             
             img_list, label_list = list(), list()
+            
             for vd in p_dict.keys():
                 img_list += list(p_dict[vd]['img'])
-                
+
                 if 'anno' in p_dict[vd]:
                     label_list += list(p_dict[vd]['anno'])
-                else:
-                    label_list = None
-            
-            if label_list is not None and len(label_list) != len(img_list):
-                img_list = img_list[:len(label_list)]
-            
-            patient_dict[patient] = [img_list, label_list]
+                
+                    if label_list is not None and len(label_list) != len(img_list):
+                        img_list = img_list[:len(label_list)]
+                        
+                    patient_dict[patient] = [img_list, label_list]
         
         return patient_dict
     
@@ -124,7 +128,7 @@ class AssetParser():
         else:
             self.load_img_path_list()
             self.make_anno()
-        
+
     def load_data_from_path(self):
         appointment_assets_df = pd.read_csv(self.args.appointment_assets_path)
         
@@ -205,7 +209,7 @@ class AssetParser():
 
     def make_anno(self):
         anno_list = natsort.natsorted(glob(self.anno_path + '/*.json'))
-        
+
         for anno_path in tqdm(anno_list):
             anno_fname = anno_path.split('/')[-1][:-5]
             tokens = anno_fname.split('_')
@@ -217,9 +221,11 @@ class AssetParser():
                         patient = 'R_' + tokens[ti+1]
                         break
                 elif self.args.dataset == 'lapa':
-                    if token == 'L':
-                        patient = 'L_' + tokens[ti+1]
-                        break
+                    patient = anno_fname[:-10]
+                    break
+                    # if token == 'L':
+                    #     patient = 'L_' + tokens[ti+1]
+                        # break
 
             if patient in self.data_dict:
                 # load annotation
@@ -235,7 +241,7 @@ class AssetParser():
                     
                 # quantization
                 labels = labels[::self.args.sample_ratio].astype('uint8')
-    
+
                 for video_name in self.data_dict[patient].keys():
                     if video_name in anno_fname:
                         self.data_dict[patient][video_name]['anno'] = labels
