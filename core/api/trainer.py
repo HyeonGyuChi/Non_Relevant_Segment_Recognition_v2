@@ -40,7 +40,7 @@ class Trainer():
     
         print('======= Load dataset =======')
         self.train_loader, self.val_loader = load_data(self.args,self.version)
-        print(len(self.train_loader), len(self.val_loader))
+        # self.train_loader = load_data(self.args,self.version)
     
         print('======= Set HEM Helper =======')
         self.hem_helper = OnlineHEM(self.args)
@@ -122,6 +122,7 @@ class Trainer():
             #     break
             
         self.metric_helper.update_loss('train')
+
     
     @torch.no_grad()
     def valid(self):
@@ -182,20 +183,16 @@ class Trainer():
         os.makedirs(ckpt_save_path, exist_ok=True)
         
         saved_pt_list = glob(os.path.join(ckpt_save_path, '*pth'))
-
         if len(saved_pt_list) > self.args.save_top_n:
             saved_pt_list = natsort.natsorted(saved_pt_list)
-
             for li in saved_pt_list[:-(self.args.save_top_n+1)]:
                 os.remove(li)
-
         save_path = '{}/epoch:{}-{}:{:.4f}-best.pth'.format(
                     ckpt_save_path,
                     self.current_epoch,
                     self.args.target_metric,
                     self.metric_helper.get_best_metric(),
                 )
-
         if self.args.num_gpus > 1:
             ckpt_state = {
                 'model': self.model.state_dict(),
@@ -205,12 +202,11 @@ class Trainer():
             }
         else:
             ckpt_state = {
-                'model': self.model.feature_module.state_dict(),
+                'model': self.model.module.feature_module.state_dict(),
                 'optimizer': self.optimizer.state_dict(),
                 'scheduler': self.scheduler.state_dict(),
                 'epoch': self.current_epoch,
             }
-
         torch.save(ckpt_state, save_path)
         print('[+] save checkpoint (Best Metric) : ', save_path)
         
@@ -221,7 +217,6 @@ class Trainer():
                         self.args.target_metric,
                         self.metric_helper.get_best_metric(),
                     )
-
             if self.args.num_gpus > 1:
                 ckpt_state = {
                     'model': self.model.module.feature_module.state_dict(),
@@ -236,10 +231,6 @@ class Trainer():
                     'scheduler': self.scheduler.state_dict(),
                     'epoch': self.current_epoch,
                 }
-
             torch.save(ckpt_state, save_path)
             print('[+] save checkpoint (Last Epoch) : ', save_path)
             
-            
-
-        

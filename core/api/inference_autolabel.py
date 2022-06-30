@@ -31,6 +31,8 @@ class InferenceDB_autolabel():
 
         self.model = get_model(self.args).to(self.args.device)
         self.model.load_state_dict(ckpt_state['model'])
+
+        # self.model = self.model.eval()
         
     def set_inference_interval(self, inference_interval):
         self.inference_interval = inference_interval

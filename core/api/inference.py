@@ -28,6 +28,8 @@ class InferenceDB():
         if self.args.num_gpus > 1:
             self.model = torch.nn.DataParallel(self.model, device_ids=list(range(self.args.num_gpus)))
         self.model.load_state_dict(ckpt_state['model'])
+
+        self.model = self.model.eval()
     
     def set_inference_interval(self, inference_interval):
         self.inference_interval = inference_interval
@@ -118,22 +120,22 @@ class InferenceDB():
 
                 try:
                     gt_list = list(self.video_assets[patient][video_name][1])
-                except:
-                    gt_list = list(np.zeros(len(predict_list))-1) # gt_list ==None
-                
-                predict_df = pd.DataFrame({
+
+                    predict_df = pd.DataFrame({
                             'frame_idx': target_frame_idx_list_new,
                             'predict': predict_list,
                             'gt': gt_list,
                             'target_img': target_img_list,
                         })
-                
 
-                self.save_results(predict_df, each_patients_save_dir, video_name)
-                
-                results[patient][video_name] = predict_df
-                
+                    self.save_results(predict_df, each_patients_save_dir, video_name)
+                    
+                    results[patient][video_name] = predict_df
 
+                except:
+                    # video는 있으나 annotation json이 없음 
+                    # 사용하는 데이터가 아님
+                   pass
             
         return results
     

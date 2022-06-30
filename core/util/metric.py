@@ -56,6 +56,7 @@ class MetricHelper():
         avg_loss = sum(self.tmp_loss_dict[state]) / len(self.tmp_loss_dict[state])
         self.tmp_loss_dict[state] = []
         self.loss_dict[state].append(avg_loss)
+    
             
     def calc_metric(self):
         """
@@ -95,8 +96,12 @@ class MetricHelper():
 
     
 
-        metrics['CR'] = (TP - FP) / (FN + TP + FP) # 잘못예측한 OOB / predict OOB + 실제 OOB # Confidence Ratio
-        metrics['OR'] = FP / (FN + TP + FP) # Over estimation ratio
+        try: 
+            metrics['CR'] = (TP - FP) / (FN + TP + FP) # 잘못예측한 OOB / predict OOB + 실제 OOB # Confidence Ratio
+            metrics['OR'] = FP / (FN + TP + FP) # Over estimation ratio
+        except:
+            metrics['CR'] = int(1)
+            metrics['OR'] = 0  # Over estimation ratio
         metrics['Mean_metric'] = (metrics['CR'] + (1-metrics['OR'])) / 2 # for train
 
         # Predict / GT CLASS elements num

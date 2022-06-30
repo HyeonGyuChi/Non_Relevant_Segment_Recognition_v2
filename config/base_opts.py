@@ -38,7 +38,7 @@ def parse_opts():
             help='What device to use for training or validation model')
 
     parser.add_argument('--max_epoch',
-            default=25,
+            default=50,
             type=int,
             help='Maximum training epoch')
 
@@ -112,9 +112,9 @@ def parse_opts():
 
     # -------------- Dataset --------------------
     parser.add_argument('--dataset', 
-            default='lapa',
+            default='both',
             type=str, 
-            help='choose a surgery dataset [robot / lapa]')
+            help='choose a surgery dataset [robot / lapa / both]')
     
     parser.add_argument('--datatype',
             default='vihub',
@@ -123,13 +123,13 @@ def parse_opts():
     
 
     parser.add_argument('--data_base_path',
-            default='/workspace/disk1',
+            default='/workspace/disk2',
             type=str,
             help='Data location')
 
     
     parser.add_argument('--data_version',
-            default='v3',
+            default='v1',
             type=str,
             choices=['v1', 'v2', 'v3'],
             help='Annotation dataset version')

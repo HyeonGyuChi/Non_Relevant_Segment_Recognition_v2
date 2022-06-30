@@ -1,5 +1,6 @@
 import os
 from glob import glob
+import natsort
 
 
 def get_inference_model_path(restore_path, load_type='best'):
@@ -9,7 +10,8 @@ def get_inference_model_path(restore_path, load_type='best'):
     
     ckpoint_path = os.path.join(restore_path + '/checkpoints', '*.pth')
     ckpts = glob(ckpoint_path)
-    # print('ckpoint_path_list : ', ckpts)
+    ckpts = natsort.natsorted(ckpts)
+    print('ckpoint_path_list : ', ckpts)
 
     for f_name in ckpts :
         if f_name.find('best') != -1 :

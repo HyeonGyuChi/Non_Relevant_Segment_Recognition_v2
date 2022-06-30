@@ -3,11 +3,14 @@ FROM pytorch/pytorch:1.7.1-cuda11.0-cudnn8-runtime
 RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN apt-get install -y ffmpeg
-RUN apt-get install libgl1-mesa-glx
    
 # set non iteratctive when installed python-opencv, tzdate
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y --no-install-recommends python-opencv
+
+RUN apt-get -y update
+RUN apt-get install -y build-essential curl unzip psmisc
+# pip install cython==0.29.0 pytest
 
  # for setup time zone
 RUN apt-get install -y tzdata

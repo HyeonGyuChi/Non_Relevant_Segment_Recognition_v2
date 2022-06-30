@@ -145,7 +145,7 @@ def main():
             RS_non_duplicate = len(rs_frame_list) - len(RS_duplicate_list)
 
 
-            f = open('/workspace/disk1/meta//meta/nrs_info_0617_ray.csv','a', newline='')
+            f = open('/workspace/disk1/meta//meta/RAY_nrs_info_0621.csv','a', newline='')
             wr = csv.writer(f)
             # patient	video	RS-non_duplicate	RS-duplicate	NRS-non_duplicate	NRS-duplicate
             wr.writerow([patient, video," ", RS_non_duplicate,RS_duplicate,NRS_non_duplicate,NRS_duplicate])

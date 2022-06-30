@@ -9,8 +9,8 @@ from config.meta_db_config import subset_condition
 class Anno2Json():
     def __init__(self, args):
         self.args = args
-        self.dp = DBParser(self.args, state='test')
-        self.db_helper = DBHelper(args)
+        # self.dp = DBParser(self.args, state='test')
+        # self.db_helper = DBHelper(args)
 
     def set_info(self,results,json_path):
         self.results = results

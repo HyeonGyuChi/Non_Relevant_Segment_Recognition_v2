@@ -7,7 +7,7 @@ def main():
     import time
     import imutils
     import datetime
-    from skimage.metrics import structural_similarity as ssim
+    # from skimage.metrics import structural_similarity as ssim
     import os
     import glob
     import natsort
@@ -37,7 +37,7 @@ def main():
 
     import warnings
     from config.base_opts import parse_opts
-    warnings.filterwarnings("ignore")
+    # warnings.filterwarnings("ignore")
     parser = parse_opts()
     args = parser.parse_args()
 
@@ -47,16 +47,16 @@ def main():
     # os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
     # os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print(device)
+    # device = torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
+    # print(device)
+
 
     json_data_list=[]
     patient_path=[]
     video_path=[]
-    frame_path=[]
 
     data_path = "/workspace/disk1/robot/vihub/img/"
-    json_data_path = "/workspace/disk1/robot/vihub/anno/v3/"
+    json_data_path = "/workspace/disk1/robot/vihub/anno/v1/"
     json_list = os.listdir(json_data_path)
     for i in range(len(os.listdir(json_data_path))):
         json_data_list.append(json_data_path + os.listdir(json_data_path)[i])
@@ -70,6 +70,11 @@ def main():
             patient_path.append( data_path + patient_name)
     # print("patient_path",patient_path)
     patient_path=natsort.natsorted(patient_path)
+    # patient_path.remove("/workspace/disk1/robot/vihub/img/01_ViHUB_B1_R_1")
+    # patient_path.remove("/workspace/disk1/robot/vihub/img/01_ViHUB_B1_R_2")
+    # patient_path.remove("/workspace/disk1/robot/vihub/img/01_ViHUB_B1_R_42")
+    # patient_path.remove("/workspace/disk1/robot/vihub/img/01_ViHUB_B1_R_52")
+    # patient_path=["/workspace/disk1/robot/vihub/img/01_ViHUB_B1_R_64","/workspace/disk1/robot/vihub/img/01_ViHUB_B1_R_65","/workspace/disk1/robot/vihub/img/01_ViHUB_B1_R_66","/workspace/disk1/robot/vihub/img/01_ViHUB_B1_R_67"]
     print()
         
         
@@ -84,6 +89,7 @@ def main():
 
         for video in video_path:
             print("video",video)
+            frame_path=[]
             for k in tqdm(os.listdir(video),desc="frame listing: "):
                 frame_path.append(video+"/"+k)
                 # print("frame_path length",len(frame_path))
@@ -154,7 +160,7 @@ def main():
 
 
 
-            f = open('/workspace/disk1/meta//meta/nrs_info_0620.csv','a', newline='')
+            f = open('/workspace/disk1/meta/GPU_some.csv','a', newline='')
             wr = csv.writer(f)
             # patient	video	RS-non_duplicate	RS-duplicate	NRS-non_duplicate	NRS-duplicate
             wr.writerow([patient, video," ", RS_non_duplicate,RS_duplicate,NRS_non_duplicate,NRS_duplicate])
@@ -167,6 +173,11 @@ def calculate_ssim_score(target_ssim_list, st_idx, ed_idx):
     import numpy as np
     import cupy as cp
     import cv2
+
+    device = cp.cuda.Device(4).use()
+    print(device)
+
+
     print("======calculate ssim score=====")
     for i in range(st_idx, ed_idx):
         prev_path, cur_path = target_ssim_list[i], target_ssim_list[i+1]
@@ -190,7 +201,8 @@ def calculate_ssim_score(target_ssim_list, st_idx, ed_idx):
         # score, _ = ssim(grayA, grayB, full=True)
         # ssim_score_list.append(score)
         
-        import cucim.skimage.metrics.structural_similarity as cim
+        # import cucim.skimage.metrics.structural_similarity as cim
+        from cucim.skimage.metrics import structural_similarity as cim
         grayA = cp.asarray(grayA)
         grayB = cp.asarray(grayB)
         score, _ = cim(grayA, grayB, full=True)
@@ -209,5 +221,6 @@ if __name__ == '__main__':
         base_path = path.dirname(path.dirname(path.abspath(__file__)))
         sys.path.append(base_path)
     
+    print("엥")
     main()
 

@@ -14,9 +14,8 @@ from core.util.parser import AssetParser
 from core.util.sampler import BoundarySampler
 
 
-
-class RobotDataset(Dataset):
-    def __init__(self, args, version, state='train', sample_type='boundary'):
+class BothDataset(Dataset):
+    def __init__(self, args, version, state, sample_type='boundary'):
         super().__init__()
         
         self.args = args
@@ -24,12 +23,10 @@ class RobotDataset(Dataset):
         self.sample_type = sample_type    
         self.version = version
         self.img_list, self.label_list = None, None
-        self.bs = BoundarySampler(self.args.IB_ratio, self.args.WS_ratio)
-        
-        self.ap = AssetParser(self.args,state=self.state)
+        self.bs = BoundarySampler(self.args.IB_ratio, self.args.WS_ratio) 
+        self.ap = AssetParser(self.args, state=self.state) 
         self.load_data()
-        
-        
+         
         # augmentation setup
         if self.args.experiment_type == 'ours':
             if self.args.model == 'mobile_vit':
@@ -40,7 +37,9 @@ class RobotDataset(Dataset):
             d_transforms = data_transforms_theator
         
         self.aug = d_transforms[self.state]
-        
+
+    
+
     def __len__(self):
         return len(self.img_list)
 
@@ -52,14 +51,14 @@ class RobotDataset(Dataset):
         img = self.aug(img)
 
         return img_path, img, label
-    
+
 
     def load_data(self):
         if self.version == "WithoutSSIM":
             self.ap.load_data()
             patient_data = self.ap.get_patient_assets()
             anno_df_list = []
-            # print("load_data_patient_data..items()",patient_data.items())
+        
             for patient, data in patient_data.items():
                 anno_df = pd.DataFrame({
                     'img_path': data[0],
@@ -71,12 +70,12 @@ class RobotDataset(Dataset):
             
                 if self.sample_type == 'boundary':
                     # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
-                    anno_df['patient'] = anno_df.img_path.str.split('/').str[6]
+                    anno_df['patient'] = anno_df.img_path.astype(str).str.split('/').str[7]
+
                     anno_df = self.bs.sample(anno_df)[['img_path', 'class_idx']] 
-                
+        
                 anno_df_list.append(anno_df)
             refine_df = pd.concat(anno_df_list)
-            
 
             # hueristic_sampling
             if self.sample_type == 'boundary':
@@ -109,12 +108,77 @@ class RobotDataset(Dataset):
             self.label_list = assets_df.class_idx.tolist()
 
             self.assets_df = assets_df
-            pd.set_option('display.max_colwidth', 1000)
-            pd.set_option('display.max_rows', 500)
-            print(self.assets_df)
-        
+
+
+
         elif self.version == "WithSSIM":
-            pass
+            # self.ap.load_data()
+            # patient_data = self.ap.get_patient_assets()
+            self.ap.load_ssim()
+            patient_data = self.ap.get_patient_assets_ssim()
+            
+            anno_df_list = []
+        
+            for patient, data in patient_data.items():
+                anno_df = pd.DataFrame({
+                    'img_path': data[0],
+                    'class_idx': data[1],
+                    'ssim_idx':data[2]
+                })
+                anno_df=anno_df.sort_values("img_path")
+                pd.set_option('display.max_colwidth', 1000)
+                pd.set_option('display.max_rows', None)
+                print("train_before_self.assets_df\n",anno_df)
+
+                import csv
+                anno_df.to_csv('/workspace/disk1/ssim.csv')
+
+                ssim_list = anno_df["ssim_idx"].tolist()
+                
+
+                exit()
+            
+                if self.sample_type == 'boundary':
+                    # print('\n\n\t ==> HUERISTIC SAMPLING ... IB_RATIO: {}, WS_RATIO: {}\n\n'.format(self.args.IB_ratio, self.args.WS_ratio))
+                    anno_df['patient'] = anno_df.img_path.astype(str).str.split('/').str[7]
+
+                    anno_df = self.bs.sample(anno_df)[['img_path', 'class_idx']] 
+        
+                anno_df_list.append(anno_df)
+            refine_df = pd.concat(anno_df_list)
+
+            # hueristic_sampling
+            if self.sample_type == 'boundary':
+                assets_df = refine_df
+
+            elif self.sample_type == 'random':
+                print('\n\n\t ==> RANDOM SAMPLING ... IB_RATIO: {}\n\n'.format(self.args.IB_ratio))
+                # random_sampling and setting IB:OOB data ratio
+                # ratio로 구성 불가능 할 경우 전체 set 모두 사용
+                nrs_ids = refine_df.index[refine_df['class_idx'] == 1].tolist()
+                nrs_df = refine_df.loc[nrs_ids]
+                rs_df = refine_df.drop(nrs_ids, inplace=True)
+                
+                max_ib_count, target_ib_count = len(rs_df), int(len(nrs_df)) * self.args.IB_ratio
+                sampling_ib_count = max_ib_count if max_ib_count < target_ib_count else target_ib_count
+                print('Random sampling from {} to {}'.format(max_ib_count, sampling_ib_count))
+                
+                rs_df = rs_df.sample(n=sampling_ib_count, replace=False) # 중복뽑기x, random seed 고정, OOB개수의 IB_ratio 개
+                assets_df = pd.concat([rs_df, nrs_df])
+                
+            elif self.sample_type == 'all':
+                print('\nSample type ALL')
+                assets_df = refine_df
+            else:
+                raise 'Load Dataset Error'
+
+            # last processing
+            assets_df = assets_df[['img_path', 'class_idx']]
+            self.img_list = assets_df.img_path.tolist()
+            self.label_list = assets_df.class_idx.tolist()
+
+            self.assets_df = assets_df
+
             # annotation json 읽어와서
             # annotation의 fps로 가져오고 가져온 img-label 정렬
             # class=2인 annotation의 첫번째, 마지막만 남기고 빼기 (img, label 모두) => 매칭 확인 필요
@@ -122,10 +186,10 @@ class RobotDataset(Dataset):
 
 
 
+
     def number_of_rs_nrs(self):
         return self.label_list.count(0) ,self.label_list.count(1)
 
-    # 해당 robot_dataset의 patinets별 assets 개수 (hem train할때 valset만들어서 hem_helper의 args.hem_per_patinets에서 사용됨.)     
     def number_of_patient_rs_nrs(self):
         patient_per_dic = {}
 
@@ -153,12 +217,3 @@ class RobotDataset(Dataset):
             )
 
         return patient_per_dic
-    
-    def get_patient_list(self):
-        full_patient_list=[]
-        for i in range(len(self.assets_df)):
-            # full_patient_list.append(self.args.data_base_path + "/toyset/" + "/".join(self.assets_df["img_path"].values[i].split("/")[7:10]))
-            full_patient_list.append(self.args.data_base_path + "/".join(self.assets_df["img_path"].values[i].split("/")[7:10]))      
-        full_patient_list=list(set(full_patient_list))
-
-        return full_patient_list

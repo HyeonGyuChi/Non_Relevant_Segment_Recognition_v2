@@ -11,6 +11,7 @@ from glob import glob
 
 from core.dataset.fold_robot import *
 from core.dataset.fold_lapa import *
+from core.dataset.fold_both import *
 
 
 
@@ -18,8 +19,11 @@ class AssetParser():
     def __init__(self, args, state):
         self.args = args
         self.state = state
+        # self.version = version
+        # print(self.version)
         self.data_dict = {}
-    
+
+        # print( self.args.train_stage)
         if 'mini' in self.args.train_stage:
             self.set_asset_info(state='train')
             self.set_mini_fold()
@@ -35,7 +39,8 @@ class AssetParser():
 
         if self.args.dataset == 'robot':
             if self.args.datatype == 'vihub':
-                self.patients_list = vihub_robot[state][self.args.fold]
+                # self.patients_list = vihub_robot[state][self.args.fold]
+                self.patients_list = vihub_robot_full[state][self.args.fold]
             elif self.args.datatype == 'etc':
                 pass
             elif self.args.datatype == 'mola':
@@ -43,7 +48,12 @@ class AssetParser():
            
         elif self.args.dataset == 'lapa':
             if self.args.datatype == 'vihub':
-                self.patients_list = vihub_lapa[state][self.args.fold]
+                # self.patients_list = vihub_lapa[state][self.args.fold]
+                self.patients_list = vihub_lapa_full[state][self.args.fold]
+        
+        elif self.args.dataset == 'both':
+            if self.args.datatype == 'vihub':
+                self.patients_list = vihub[state][self.args.fold]
 
 
         
@@ -80,6 +90,7 @@ class AssetParser():
             
     def get_patient_assets(self):
         patient_dict = {}
+       
         # print("get_patient_assets self.data_dict",self.data_dict) #30, 60마다 이미지 
         for patient in self.data_dict.keys():
             p_dict = self.data_dict[patient]
@@ -106,7 +117,7 @@ class AssetParser():
             
             patient_dict[patient] = [img_list, label_list]
             # print("ap.get_patient_assets patient_dict",patient_dict)
-            
+                
         
         return patient_dict
     
@@ -211,7 +222,7 @@ class AssetParser():
                     }
         
     def load_img_path_list(self):
-        for patient in tqdm(self.patients_list[:2]):
+        for patient in tqdm(self.patients_list):
             p_path = self.img_base_path + f'/{patient}'
             video_list = natsort.natsorted(os.listdir(p_path))
 
@@ -248,7 +259,7 @@ class AssetParser():
 
     def make_anno(self):
         anno_list = natsort.natsorted(glob(self.anno_path + '/*.json'))
-        
+            
         for anno_path in tqdm(anno_list):
             anno_fname = anno_path.split('/')[-1][:-5]
             tokens = anno_fname.split('_')
@@ -262,7 +273,7 @@ class AssetParser():
                     # load annotation
                     with open(anno_path, 'r') as f:
                         data = json.load(f)
-
+                    # print(data)
                     # make annotation
                     labels = np.zeros(round(data['totalFrame']))
                     for anno in data['annotations']:
@@ -283,7 +294,46 @@ class AssetParser():
                     try:
                         with open(anno_path, 'r') as f:
                             data = json.load(f)
+                        # make annotation
+                        labels = np.zeros(round(data["totalFrame"]))
+                        for anno in data['annotations']:
+                            st, ed = anno['start'], anno['end']
+                            labels[st:ed+1] = 1
+                            
+                        # quantization
+                        # labels = labels[::self.args.sample_ratio].astype('uint8')
+                        labels=labels.tolist()
+                        labels = labels[::round(data['frameRate'])].astype('uint8')
+                        for video_name in self.data_dict[patient].keys():
+                            if video_name in anno_fname:
+                                self.data_dict[patient][video_name]['anno'] = labels
+                        f.close()
 
+                    except:
+                        with open(anno_path, 'r') as f:
+                            data = json.load(f)
+                            # print("data", data)
+                            
+                        # make annotation
+                        labels = np.zeros(round(data["totalFrame"]))
+                        for anno in data['annotations']:
+                            st, ed = anno['start'], anno['end']
+                            labels[st:ed+1] = 1
+                            
+                        # quantization
+                        # labels = labels[::self.args.sample_ratio].astype('uint8')
+                        # labels=labels.tolist()
+                        labels = labels[::round(data['frameRate'])].astype('uint8')
+                        for video_name in self.data_dict[patient].keys():
+                            if video_name in anno_fname:
+                                self.data_dict[patient][video_name]['anno'] = labels
+                        f.close()
+
+            elif self.args.dataset == 'both':
+                if patient in self.data_dict.keys():
+                    try:
+                        with open(anno_path, 'r') as f:
+                            data = json.load(f)
                         # make annotation
                         labels = np.zeros(round(data["totalFrame"]))
                         for anno in data['annotations']:
@@ -320,4 +370,133 @@ class AssetParser():
                         f.close()
 
 
+    def load_ssim(self):
+        self.load_img_path_list()
+        # make anno func
+        anno_list = natsort.natsorted(glob(self.anno_path + '/*.json'))
+            
+        for anno_path in tqdm(anno_list):
+            anno_fname = anno_path.split('/')[-1][:-5]
+            tokens = anno_fname.split('_')
 
+            # search patient number
+            patient = anno_fname.split("_")[0]+"_"+anno_fname.split("_")[1]+"_"+anno_fname.split("_")[2]+"_"+anno_fname.split("_")[3]+"_"+anno_fname.split("_")[4]
+            # print("make anno patient",patient)
+
+            if self.args.dataset == 'robot':
+                if patient in self.data_dict:
+                    # load annotation
+                    with open(anno_path, 'r') as f:
+                        data = json.load(f)
+
+                    # make annotation
+                    labels = np.zeros(round(data['totalFrame']))
+                    for anno in data['annotations']:
+                        st, ed = anno['start'], anno['end']
+                        labels[st:ed+1] = 1
+                        
+                    # quantization
+                    # labels = labels[::self.args.sample_ratio].astype('uint8')
+                    labels = labels[::round(data['frameRate'])].astype('uint8')
+                    labels=labels.tolist()
+                    for video_name in self.data_dict[patient].keys():
+                        if video_name in anno_fname:
+                            self.data_dict[patient][video_name]['anno'] = labels
+                    f.close()
+
+            elif self.args.dataset == 'lapa':
+                if patient in self.data_dict.keys():
+                    try:
+                        with open(anno_path, 'r') as f:
+                            data = json.load(f)
+
+                        # make annotation
+                        # labels = np.zeros(round(data["totalFrame"]))
+                        # for anno in data['annotations']:
+                        #     st, ed = anno['start'], anno['end']
+                        #     labels[st:ed+1] = 1
+
+                        labels_ssim = np.zeros(round(data["totalFrame"]))
+                        labels = np.zeros(round(data["totalFrame"]))
+                        for anno in data['annotations']:
+                            if anno['code']==1:
+                                st, ed = anno['start'], anno['end']
+                                labels[st:ed+1] = int(1)
+                            if anno['code']==2:
+                                st, ed = anno['start'], anno['end']
+                                labels_ssim[st:ed+1] = int(2)
+                            
+                        # quantization
+                        # labels = labels[::self.args.sample_ratio].astype('uint8')
+                        labels=labels.tolist()
+                        labels = labels[::round(data['frameRate'])].astype('uint8')
+                        labels_ssim=labels_ssim.tolist()
+                        labels_ssim = labels_ssim[::round(data['frameRate'])].astype('uint8')
+
+                        for video_name in self.data_dict[patient].keys():
+                            if video_name in anno_fname:
+                                self.data_dict[patient][video_name]['anno'] = [labels,labels_ssim]
+                        f.close()
+
+                    except:
+                        with open(anno_path, 'r') as f:
+                            data = json.load(f)
+                            # print("data", data)
+                            
+                        # make annotation
+                        labels_ssim = np.zeros(round(data["totalFrame"]))
+                        labels = np.zeros(round(data["totalFrame"]))
+                        for anno in data['annotations']:
+                            if anno['code']==1:
+                                st, ed = anno['start'], anno['end']
+                                labels[st:ed+1] = int(1)
+                            if anno['code']==2:
+                                st, ed = anno['start'], anno['end']
+                                labels_ssim[st:ed+1] = int(2)
+                                
+                        # quantization
+                        # labels = labels[::self.args.sample_ratio].astype('uint8')
+                        # labels=labels.tolist()
+                        labels = labels[::round(data['frameRate'])]
+                        labels_ssim=labels_ssim.tolist()
+                        labels_ssim = labels_ssim[::round(data['frameRate'])]
+
+                        for video_name in self.data_dict[patient].keys():
+                            if video_name in anno_fname:
+                                self.data_dict[patient][video_name]['anno'] = [labels,labels_ssim]
+                        f.close()
+                    # print(self.data_dict)
+
+    def get_patient_assets_ssim(self):
+        # print( self.data_dict)
+        patient_dict = {}
+        for patient in self.data_dict.keys():
+            p_dict = self.data_dict[patient]
+            
+            img_list, label_list,ssim_list = list(), list(), list()
+            anno_list=[]
+            for vd in p_dict.keys():
+                img_list += list(p_dict[vd]['img'])
+                
+                if 'anno' in p_dict[vd]:
+                    try:
+                        label_list += list(p_dict[vd]['anno'][0])
+                        ssim_list += list(p_dict[vd]['anno'][1])
+                    except:
+                        label_list=p_dict[vd]['anno'][0]
+                        ssim_list=p_dict[vd]['anno'][1]
+
+                else:
+                    label_list = None
+
+            if label_list is not None and len(label_list) != len(img_list):
+                min_len = min(len(img_list), len(label_list),len(ssim_list))
+                img_list = img_list[:min_len]
+                label_list = label_list[:min_len]
+                ssim_list = ssim_list[:min_len]
+                #img_list = img_list[:len(label_list)]
+            print(len(img_list), len(label_list),len(ssim_list))
+            patient_dict[patient] = [img_list, label_list,ssim_list]
+            # print("ap.get_patient_assets patient_dict",patient_dict)
+        
+        return patient_dict

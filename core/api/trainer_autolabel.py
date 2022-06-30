@@ -214,24 +214,20 @@ class Trainer_autolabel():
         os.makedirs(ckpt_save_path, exist_ok=True)
         
         saved_pt_list = glob(os.path.join(ckpt_save_path, '*pth'))
-
         if len(saved_pt_list) > self.args.save_top_n:
             saved_pt_list = natsort.natsorted(saved_pt_list)
-
             for li in saved_pt_list[:-(self.args.save_top_n+1)]:
                 os.remove(li)
-
         save_path = '{}/epoch:{}-{}:{:.4f}-best.pth'.format(
                     ckpt_save_path,
                     self.current_epoch,
                     self.args.target_metric,
                     self.metric_helper.get_best_metric(),
                 )
-
         if self.args.num_gpus > 1:
             ckpt_state = {
-                'model': self.model.feature_module.state_dict(),
-                'optimizer': self.optimizer.state_dict(),
+                'model': self.model.module.state_dict(),
+                'optimizer': self.optimizer.module.state_dict(),
                 'scheduler': self.scheduler.state_dict(),
                 'epoch': self.current_epoch,
             }
@@ -242,7 +238,6 @@ class Trainer_autolabel():
                 'scheduler': self.scheduler.state_dict(),
                 'epoch': self.current_epoch,
             }
-
         torch.save(ckpt_state, save_path)
         print('[+] save checkpoint (Best Metric) : ', save_path)
         
@@ -253,11 +248,10 @@ class Trainer_autolabel():
                         self.args.target_metric,
                         self.metric_helper.get_best_metric(),
                     )
-
             if self.args.num_gpus > 1:
                 ckpt_state = {
-                    'model': self.model.feature_module.state_dict(),
-                    'optimizer': self.optimizer.state_dict(),
+                    'model': self.model.module.state_dict(),
+                    'optimizer': self.optimizer.module.state_dict(),
                     'scheduler': self.scheduler.state_dict(),
                     'epoch': self.current_epoch,
                 }
@@ -268,8 +262,6 @@ class Trainer_autolabel():
                     'scheduler': self.scheduler.state_dict(),
                     'epoch': self.current_epoch,
                 }
-
             torch.save(ckpt_state, save_path)
             print('[+] save checkpoint (Last Epoch) : ', save_path)
-            
             
